@@ -66,24 +66,61 @@ td,th{border:1px solid var(--border);padding:0;vertical-align:top;font-size:11px
 .hdr-hidden{display:none!important}
 .ftr-hidden{display:none!important}
 /* IMAGE EDITOR */
-#edOverlay{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.8);align-items:flex-start;justify-content:center;overflow-y:auto;padding:8px 4px}
+#edOverlay{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.86);align-items:stretch;justify-content:center;overflow:hidden;padding:0}
 #edOverlay.open{display:flex}
-#edBox{background:#fff;border-radius:10px;display:flex;flex-direction:column;width:min(100%,860px);overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5);margin:auto}
-#edToolbar{display:flex;gap:5px;align-items:center;padding:8px 10px;background:#f0f0f0;border-bottom:1px solid #ccc;flex-wrap:wrap}
-.eb{border:1px solid #aaa;background:#fff;border-radius:6px;padding:5px 11px;font-size:13px;cursor:pointer;font-family:inherit;color:#111;min-height:34px;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;-webkit-tap-highlight-color:transparent;user-select:none}
-.eb:active{background:#e0e0e0}.eb.act{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
-.eb.ok{border-color:#0a5a2a;color:#0a5a2a}.eb.ok:active{background:#e8f5e9}
-.eb.ng{border-color:#c00;color:#c00}.eb.ng:active{background:#fee}
-.ed-sep{width:1px;height:24px;background:#ccc;flex-shrink:0}
-.ec{width:26px;height:26px;border-radius:50%;border:2px solid #999;cursor:pointer;flex-shrink:0;display:inline-block;-webkit-tap-highlight-color:transparent}
-.ec.act{border-color:#111;transform:scale(1.25);box-shadow:0 0 0 2px #fff,0 0 0 4px #333}
-#edWrap{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;background:#666;min-height:200px;padding:10px}
-#edCanvas{display:block;touch-action:none;cursor:crosshair;max-width:100%}
-#edStatus{font-size:12px;color:#555;padding:2px 6px}
-#edTextPop{display:none;position:fixed;z-index:9500;background:#fff;border:2px solid #333;border-radius:8px;padding:10px;box-shadow:0 4px 20px rgba(0,0,0,.35);flex-direction:column;gap:7px;min-width:220px}
+#edBox{background:#161616;display:flex;flex-direction:column;width:100vw;height:100vh;max-width:none;max-height:none;overflow:hidden;box-shadow:none;margin:0;color:#fff}
+#edToolbar{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#141414;border-bottom:1px solid rgba(255,255,255,.08);overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:thin}
+#edToolbar::-webkit-scrollbar{height:8px}
+#edToolbar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:10px}
+.ed-group{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.ed-group.right{margin-left:auto}
+.ed-chip{height:36px;display:inline-flex;align-items:center;justify-content:center;padding:0 14px;border-radius:999px;background:#2a2a2a;border:1px solid rgba(255,255,255,.12);color:#fff;font-size:14px;font-weight:700;gap:8px;cursor:default}
+.ed-chip .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.ed-chip.active{background:#303030;border-color:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+.eb{border:1px solid rgba(255,255,255,.08);background:#252525;border-radius:12px;padding:0 14px;height:44px;font-size:13px;cursor:pointer;font-family:inherit;color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;-webkit-tap-highlight-color:transparent;user-select:none;transition:transform .08s ease,background .15s ease,border-color .15s ease,box-shadow .15s ease;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.eb:active{transform:translateY(1px);background:#1f1f1f}
+.eb.act{background:#16a34a;color:#fff;border-color:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.22)}
+.eb.ok{background:#27ae60;border-color:#31c36f;color:#fff;font-weight:700}
+.eb.ng{background:#2a2a2a;border-color:rgba(255,255,255,.08);color:#ff5f57}
+.eb.icon{width:56px;min-width:56px;padding:0 6px;font-size:20px;line-height:1;font-weight:700}
+.eb.icon.sm{width:46px;min-width:46px;font-size:18px}
+.eb.icon span[aria-hidden="true"]{display:inline-block;min-width:1em;text-align:center}
+.eb .lbl{font-size:12px;font-weight:700;letter-spacing:.2px}
+.ed-sep{width:1px;height:34px;background:rgba(255,255,255,.12);flex-shrink:0;margin:0 2px}
+#edStatus{font-size:12px;color:#d1d5db;padding:0 2px;flex:0 0 auto}
+#edWrap{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;background:#1b1b1b;min-height:200px;padding:10px 10px 0}
+#edCanvas{display:block;touch-action:none;cursor:crosshair;max-width:min(100%,1200px);border-radius:10px;box-shadow:0 6px 30px rgba(0,0,0,.35);background:#fff}
+#edBottomBar{padding:12px 14px 16px;background:#111;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:14px}
+#edBottomTools{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+#edColors{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ec{width:42px;height:42px;border-radius:50%;border:3px solid rgba(255,255,255,.18);cursor:pointer;flex-shrink:0;display:inline-block;-webkit-tap-highlight-color:transparent;transition:transform .12s ease,border-color .12s ease,box-shadow .12s ease}
+.ec.act{border-color:#fff;transform:scale(1.06);box-shadow:0 0 0 4px rgba(255,255,255,.12)}
+#edSizeWrap{display:flex;align-items:center;gap:12px;min-width:min(100%,320px);margin-left:auto}
+#edSizeLabel{font-size:13px;color:#d1d5db;white-space:nowrap}
+#etFS{appearance:none;-webkit-appearance:none;width:min(48vw,220px);height:10px;border-radius:999px;background:#4b5563;outline:none;cursor:pointer}
+#etFS::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;background:#22c55e;border:none;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#etFS::-moz-range-thumb{width:24px;height:24px;border:none;border-radius:50%;background:#22c55e;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#etFSVal{font-size:13px;color:#fff;min-width:42px;text-align:right}
+#edActions{display:flex;gap:12px}
+#edActions .eb{height:54px;border-radius:18px;font-size:16px;flex:1}
+#edActions .eb .lbl{font-size:16px}
+#edTextPop{display:none;position:fixed;z-index:9500;background:#fff;border:2px solid #333;border-radius:12px;padding:12px;box-shadow:0 4px 20px rgba(0,0,0,.35);flex-direction:column;gap:8px;min-width:260px}
 #edTextPop.open{display:flex}
-#edTF{border:1px solid #ccc;padding:7px 9px;font-size:15px;font-family:inherit;border-radius:4px;outline:none}
-#edTextPop .epb{display:flex;gap:6px}
+#edTF{border:1px solid #ccc;padding:10px 12px;font-size:15px;font-family:inherit;border-radius:8px;outline:none}
+#edTextPop .epb{display:flex;gap:8px}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@media(max-width:760px){
+  #edToolbar{padding:10px 10px;gap:8px}
+  .eb.icon{width:48px;min-width:48px;height:42px;font-size:18px;border-radius:11px}
+  .eb.icon.sm{width:42px;min-width:42px;height:42px;font-size:17px}
+  #edWrap{padding:8px 8px 0}
+  #edBottomBar{padding:10px 10px 12px;gap:12px}
+  #edBottomTools{align-items:flex-start}
+  #edSizeWrap{width:100%;min-width:0;justify-content:flex-end}
+  #edActions{width:100%}
+  #edActions .eb{height:52px}
+  .ec{width:40px;height:40px}
+}
 /* stage สำหรับ PDF */
 .spdf-stage{position:fixed!important;left:0!important;top:0!important;width:1320px!important;background:#fff!important;z-index:2147483647!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
 .spdf-stage .toolbar,.spdf-stage .thumb-edit-btn,.spdf-stage .thumb-del-btn,.spdf-stage .btn-upload,.spdf-stage .media-toolbar,.spdf-stage .fullscreen-fab{display:none!important}
@@ -122,32 +159,54 @@ body.pdf-exp .inspection-head-scroll{padding-right:0!important;--sbw:0px!importa
 <div id="edOverlay">
  <div id="edBox">
   <div id="edToolbar">
-   <button class="eb act" id="etSel">↖ Select</button>
-   <button class="eb" id="etTxt">T Text</button>
-   <button class="eb" id="etNum">123 No.</button>
-   <button class="eb" id="etArr">➡ Arrow</button>
-   <button class="eb" id="etCir">⭕ Circle</button>
+   <div class="ed-group">
+    <button class="eb icon act" id="etSel" title="Select / เลือก"><span aria-hidden="true">SEL</span><span class="sr-only">Select</span></button>
+    <button class="eb icon" id="etPen" title="Pencil / ดินสอ"><span aria-hidden="true">✎</span><span class="sr-only">Pencil</span></button>
+    <button class="eb icon" id="etArr" title="Arrow / ลูกศร"><span aria-hidden="true">→</span><span class="sr-only">Arrow</span></button>
+    <button class="eb icon" id="etLine" title="Line / เส้น"><span aria-hidden="true">／</span><span class="sr-only">Line</span></button>
+    <button class="eb icon" id="etCir" title="Circle / วงกลม"><span aria-hidden="true">○</span><span class="sr-only">Circle</span></button>
+    <button class="eb icon" id="etRect" title="Square / สี่เหลี่ยม"><span aria-hidden="true">□</span><span class="sr-only">Square</span></button>
+    <button class="eb icon" id="etChk" title="Check / เช็กถูก"><span aria-hidden="true">✓</span><span class="sr-only">Check</span></button>
+    <button class="eb icon" id="etCross" title="X / กากบาท"><span aria-hidden="true">✕</span><span class="sr-only">X</span></button>
+    <button class="eb icon" id="etTxt" title="Text / ข้อความ"><span aria-hidden="true">T</span><span class="sr-only">Text</span></button>
+    <button class="eb icon" id="etNum" title="Number / ตัวเลข"><span aria-hidden="true">①</span><span class="sr-only">Number</span></button>
+   </div>
    <div class="ed-sep"></div>
-   <span style="font-size:12px;color:#555;flex-shrink:0">สี:</span>
-   <span class="ec act" data-c="red"    style="background:#f00"    title="Red"></span>
-   <span class="ec"     data-c="yellow" style="background:#ffd400" title="Yellow"></span>
-   <span class="ec"     data-c="lime"   style="background:#00d84a" title="Green"></span>
-   <span class="ec"     data-c="white"  style="background:#fff;border-color:#999" title="White"></span>
-   <span class="ec"     data-c="black"  style="background:#111"    title="Black"></span>
+   <div class="ed-group">
+    <button class="eb icon sm" id="etUndo" title="Undo / ย้อนกลับ"><span aria-hidden="true">↶</span><span class="sr-only">Undo</span></button>
+    <button class="eb icon sm ng" id="etClr" title="Clear / ล้างทั้งหมด"><span aria-hidden="true">⌫</span><span class="sr-only">Clear</span></button>
+   </div>
    <div class="ed-sep"></div>
-   <select id="etFS" style="border:1px solid #aaa;border-radius:5px;padding:3px 6px;font-size:13px;height:34px;cursor:pointer">
-    <option value="14">14</option><option value="18" selected>18</option>
-    <option value="24">24</option><option value="32">32</option><option value="48">48</option>
-   </select>px
-   <div class="ed-sep"></div>
-   <button class="eb" id="etUndo">↩ Undo</button>
-   <button class="eb ng" id="etClr">🗑 Clear</button>
    <span id="edStatus"></span>
-   <div style="flex:1;min-width:4px"></div>
-   <button class="eb ok" id="etDone">✅ Done</button>
-   <button class="eb ng" id="etCxl">❌ Cancel</button>
+   <div class="ed-group right">
+    <span class="ed-chip active"><span class="dot" style="background:#3b82f6"></span>รูป</span>
+    <span class="ed-chip"><span class="dot" style="background:#22c55e"></span>annot</span>
+   </div>
   </div>
   <div id="edWrap"><canvas id="edCanvas"></canvas></div>
+  <div id="edBottomBar">
+   <div id="edBottomTools">
+    <div id="edColors">
+     <span class="ec act" data-c="orangered" style="background:#ff4d06" title="Orange red"></span>
+     <span class="ec" data-c="gold" style="background:#ffdd00" title="Yellow"></span>
+     <span class="ec" data-c="lime" style="background:#00d84a" title="Green"></span>
+     <span class="ec" data-c="dodgerblue" style="background:#1f7ae0" title="Blue"></span>
+     <span class="ec" data-c="white" style="background:#fff;border-color:#6b7280" title="White"></span>
+     <span class="ec" data-c="black" style="background:#000" title="Black"></span>
+     <span class="ec" data-c="hotpink" style="background:#ec5fae" title="Pink"></span>
+     <span class="ec" data-c="deepskyblue" style="background:#18b7d6" title="Cyan"></span>
+    </div>
+    <div id="edSizeWrap">
+     <span id="edSizeLabel">ขนาด</span>
+     <input id="etFS" type="range" min="14" max="48" step="2" value="18" aria-label="ขนาดตัวอักษร / เส้น" />
+     <span id="etFSVal">18</span>
+    </div>
+   </div>
+   <div id="edActions">
+    <button class="eb ng" id="etCxl"><span aria-hidden="true">✕</span> <span class="lbl">ยกเลิก</span></button>
+    <button class="eb ok" id="etDone"><span aria-hidden="true">☑</span> <span class="lbl">บันทึกรูปภาพ</span></button>
+   </div>
+  </div>
  </div>
 </div>
 <div id="edTextPop">
@@ -319,8 +378,17 @@ function flattenThumb(thumb){
 function drawLayerCtx(ctx,l,sx,sy,W,H){
   ctx.save();
   const col=gc(l.color);
-  ctx.strokeStyle=col;ctx.fillStyle=col;
-  if(l.type==='circle'){
+  ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineCap='round';ctx.lineJoin='round';
+  if(l.type==='pencil'){
+    const pts=Array.isArray(l.points)?l.points:[];
+    if(pts.length>1){
+      ctx.lineWidth=Math.max(2,((l.size||18)/4)*Math.min(sx,sy));
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x*sx,pts[0].y*sy);
+      for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x*sx,pts[i].y*sy);
+      ctx.stroke();
+    }
+  } else if(l.type==='circle'){
     const rw=Math.abs(l.w)/2*sx,rh=Math.abs(l.h)/2*sy;
     const cx=(l.x+(l.w>0?Math.abs(l.w)/2:-Math.abs(l.w)/2))*sx;
     const cy=(l.y+(l.h>0?Math.abs(l.h)/2:-Math.abs(l.h)/2))*sy;
@@ -330,22 +398,32 @@ function drawLayerCtx(ctx,l,sx,sy,W,H){
       ctx.ellipse(cx,cy,Math.max(1,rw-ctx.lineWidth/2),Math.max(1,rh-ctx.lineWidth/2),0,0,Math.PI*2);
       ctx.stroke();
     }
-  } else if(l.type==='arrow'){
+  } else if(l.type==='rect'){
+    const x=Math.min(l.x,l.x+l.w)*sx,y=Math.min(l.y,l.y+l.h)*sy,w=Math.abs(l.w)*sx,h=Math.abs(l.h)*sy;
+    if(w>1&&h>1){ctx.lineWidth=Math.max(3,6*Math.min(sx,sy));ctx.strokeRect(x,y,w,h);}
+  } else if(l.type==='line' || l.type==='arrow'){
     const x1=l.x1*sx,y1=l.y1*sy,x2=l.x2*sx,y2=l.y2*sy;
     const len=Math.hypot(x2-x1,y2-y1);
     if(len>2){
-      const ang=Math.atan2(y2-y1,x2-x1);
-      const hl=Math.min(28,Math.max(8,len*.22));
       ctx.lineWidth=Math.max(2,4*Math.min(sx,sy));
       ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(x2,y2);
-      ctx.lineTo(x2-hl*Math.cos(ang-Math.PI/7),y2-hl*Math.sin(ang-Math.PI/7));
-      ctx.lineTo(x2-hl*Math.cos(ang+Math.PI/7),y2-hl*Math.sin(ang+Math.PI/7));
-      ctx.closePath();ctx.fill();
+      if(l.type==='arrow'){
+        const ang=Math.atan2(y2-y1,x2-x1);
+        const hl=Math.min(28,Math.max(8,len*.22));
+        ctx.beginPath();ctx.moveTo(x2,y2);
+        ctx.lineTo(x2-hl*Math.cos(ang-Math.PI/7),y2-hl*Math.sin(ang-Math.PI/7));
+        ctx.lineTo(x2-hl*Math.cos(ang+Math.PI/7),y2-hl*Math.sin(ang+Math.PI/7));
+        ctx.closePath();ctx.fill();
+      }
     }
+  } else if(l.type==='check'){
+    const x=Math.min(l.x,l.x+l.w)*sx,y=Math.min(l.y,l.y+l.h)*sy,w=Math.abs(l.w)*sx,h=Math.abs(l.h)*sy;
+    if(w>1&&h>1){ctx.lineWidth=Math.max(3,6*Math.min(sx,sy));ctx.beginPath();ctx.moveTo(x+w*0.12,y+h*0.55);ctx.lineTo(x+w*0.38,y+h*0.82);ctx.lineTo(x+w*0.88,y+h*0.16);ctx.stroke();}
+  } else if(l.type==='cross'){
+    const x=Math.min(l.x,l.x+l.w)*sx,y=Math.min(l.y,l.y+l.h)*sy,w=Math.abs(l.w)*sx,h=Math.abs(l.h)*sy;
+    if(w>1&&h>1){ctx.lineWidth=Math.max(3,6*Math.min(sx,sy));ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y+h);ctx.moveTo(x+w,y);ctx.lineTo(x,y+h);ctx.stroke();}
   } else if(l.type==='text'||l.type==='number'){
     const fs=Math.max(8,Math.round((l.fontSize||18)*Math.min(sx,sy)));
-    /* ✅ FIX: แก้ syntax จาก ctx.font`...` เป็น ctx.font = `...` */
     ctx.font = `bold ${fs}px Arial`;
     ctx.lineWidth=Math.max(3,5*Math.min(sx,sy));
     ctx.strokeStyle='rgba(255,255,255,.85)';
@@ -365,18 +443,18 @@ const edTextPop=document.getElementById('edTextPop');
 const edTF     =document.getElementById('edTF');
 const edFSel   =document.getElementById('etFS');
 let edThumb=null,edBaseUrl='',edLayers=[],edUndo=[];
-let edTool='select',edColor='red';
+let edTool='select',edColor='orangered';
 let edNumCnt=0,edSel=null;
 let edDrag=false,edDOX=0,edDOY=0;
 let edDrawing=false,edDS={x:0,y:0},edPendXY=null;
 let edW=800,edH=600;
-const ETIDS={select:'etSel',text:'etTxt',number:'etNum',arrow:'etArr',circle:'etCir'};
-Object.keys(ETIDS).forEach(k=>document.getElementById(ETIDS[k]).onclick=()=>setEdTool(k));
+const ETIDS={select:'etSel',pencil:'etPen',text:'etTxt',number:'etNum',arrow:'etArr',line:'etLine',circle:'etCir',rect:'etRect',check:'etChk',cross:'etCross'};
+Object.keys(ETIDS).forEach(k=>{ const el=document.getElementById(ETIDS[k]); if(el) el.onclick=()=>setEdTool(k); });
 function setEdTool(t){
   edTool=t;
   Object.keys(ETIDS).forEach(k=>document.getElementById(ETIDS[k]).classList.toggle('act',k===t));
   edCanvas.style.cursor=t==='select'?'default':'crosshair';
-  edStatus.textContent={select:'คลิกเลือก/ลาก — Delete ลบ',text:'คลิกบนรูปเพื่อใส่ข้อความ',number:'คลิกบนรูปเพื่อใส่ตัวเลข',arrow:'ลากวาดลูกศร',circle:'ลากวาดวงกลม'}[t]||'';
+  edStatus.textContent={select:'คลิกเลือก/ลาก — Delete ลบ',pencil:'ลากวาดเส้นอิสระ',text:'คลิกบนรูปเพื่อใส่ข้อความ',number:'คลิกบนรูปเพื่อใส่ตัวเลข',arrow:'ลากวาดลูกศร',line:'ลากวาดเส้น',circle:'ลากวาดวงกลม',rect:'ลากวาดสี่เหลี่ยม',check:'ลากวาดเครื่องหมายถูก',cross:'ลากวาดกากบาท'}[t]||'';
 }
 document.querySelectorAll('.ec').forEach(b=>{
   b.onclick=()=>{
@@ -410,168 +488,80 @@ function edRedraw(){
     bg.onload=()=>{edCtx.drawImage(bg,0,0,edCanvas.width,edCanvas.height);edDrawAllLayers();};
   }
 }
-function edDrawAllLayers(){edLayers.forEach(l=>edDrawL(l,l===edSel));}
+function edBounds(l){
+  if(l.type==='pencil'){
+    const pts=Array.isArray(l.points)?l.points:[];
+    if(!pts.length) return {x:0,y:0,w:0,h:0};
+    const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
+    const minx=Math.min(...xs), maxx=Math.max(...xs), miny=Math.min(...ys), maxy=Math.max(...ys);
+    const pad=Math.max(6,(l.size||18)/4+4);
+    return {x:minx-pad,y:miny-pad,w:(maxx-minx)+pad*2,h:(maxy-miny)+pad*2};
+  }
+  if(['circle','rect','check','cross'].includes(l.type)) return {x:Math.min(l.x,l.x+l.w),y:Math.min(l.y,l.y+l.h),w:Math.abs(l.w),h:Math.abs(l.h)};
+  if(['line','arrow'].includes(l.type)) return {x:Math.min(l.x1,l.x2),y:Math.min(l.y1,l.y2),w:Math.abs(l.x2-l.x1),h:Math.abs(l.y2-l.y1)};
+  if(l.type==='text'||l.type==='number'){
+    const fs=l.fontSize||18; edCtx.save(); edCtx.font=`bold ${fs}px Arial`; const mw=edCtx.measureText(l.text||'').width; edCtx.restore();
+    return {x:l.x-2,y:l.y-fs,w:mw+4,h:fs+6};
+  }
+  return {x:0,y:0,w:0,h:0};
+}
 function edDrawL(l,sel){
   edCtx.save();
   const col=gc(l.color);
-  edCtx.strokeStyle=col;edCtx.fillStyle=col;
-  if(l.type==='circle'){
-    edCtx.lineWidth=6;
-    const rw=Math.abs(l.w)/2,rh=Math.abs(l.h)/2;
-    const cx=l.x+(l.w>0?rw:-rw),cy=l.y+(l.h>0?rh:-rh);
-    if(rw>2&&rh>2){
-      edCtx.beginPath();
-      edCtx.ellipse(cx,cy,Math.max(1,rw-3),Math.max(1,rh-3),0,0,Math.PI*2);
-      edCtx.stroke();
-    }
-    if(sel)edSelBox(Math.min(l.x,l.x+l.w),Math.min(l.y,l.y+l.h),Math.abs(l.w),Math.abs(l.h));
-  } else if(l.type==='arrow'){
-    edCtx.lineWidth=4;
-    const dx=l.x2-l.x1,dy=l.y2-l.y1,len=Math.hypot(dx,dy);
-    if(len>4){
-      const ang=Math.atan2(dy,dx);
-      const hl=Math.min(28,Math.max(14,len*.22));
-      edCtx.beginPath();edCtx.moveTo(l.x1,l.y1);edCtx.lineTo(l.x2,l.y2);edCtx.stroke();
-      edCtx.beginPath();edCtx.moveTo(l.x2,l.y2);
-      edCtx.lineTo(l.x2-hl*Math.cos(ang-Math.PI/7),l.y2-hl*Math.sin(ang-Math.PI/7));
-      edCtx.lineTo(l.x2-hl*Math.cos(ang+Math.PI/7),l.y2-hl*Math.sin(ang+Math.PI/7));
-      edCtx.closePath();edCtx.fill();
-      if(sel){const mx=(l.x1+l.x2)/2,my=(l.y1+l.y2)/2;edSelBox(mx-20,my-20,40,40);}
-    }
+  edCtx.strokeStyle=col;edCtx.fillStyle=col;edCtx.lineCap='round';edCtx.lineJoin='round';
+  if(l.type==='pencil'){
+    const pts=Array.isArray(l.points)?l.points:[];
+    if(pts.length>1){ edCtx.lineWidth=Math.max(2,(l.size||18)/4); edCtx.beginPath(); edCtx.moveTo(pts[0].x,pts[0].y); for(let i=1;i<pts.length;i++) edCtx.lineTo(pts[i].x,pts[i].y); edCtx.stroke(); }
+  } else if(l.type==='circle'){
+    edCtx.lineWidth=6; const rw=Math.abs(l.w)/2,rh=Math.abs(l.h)/2; const cx=l.x+(l.w>0?rw:-rw),cy=l.y+(l.h>0?rh:-rh); if(rw>2&&rh>2){edCtx.beginPath();edCtx.ellipse(cx,cy,Math.max(1,rw-3),Math.max(1,rh-3),0,0,Math.PI*2);edCtx.stroke();}
+  } else if(l.type==='rect'){
+    const b=edBounds(l); edCtx.lineWidth=6; if(b.w>2&&b.h>2) edCtx.strokeRect(b.x,b.y,b.w,b.h);
+  } else if(l.type==='arrow' || l.type==='line'){
+    edCtx.lineWidth=4; const dx=l.x2-l.x1,dy=l.y2-l.y1,len=Math.hypot(dx,dy); if(len>4){ const ang=Math.atan2(dy,dx); edCtx.beginPath();edCtx.moveTo(l.x1,l.y1);edCtx.lineTo(l.x2,l.y2);edCtx.stroke(); if(l.type==='arrow'){ const hl=Math.min(28,Math.max(14,len*.22)); edCtx.beginPath();edCtx.moveTo(l.x2,l.y2);edCtx.lineTo(l.x2-hl*Math.cos(ang-Math.PI/7),l.y2-hl*Math.sin(ang-Math.PI/7));edCtx.lineTo(l.x2-hl*Math.cos(ang+Math.PI/7),l.y2-hl*Math.sin(ang+Math.PI/7));edCtx.closePath();edCtx.fill(); } }
+  } else if(l.type==='check'){
+    const b=edBounds(l); if(b.w>2&&b.h>2){ edCtx.lineWidth=6; edCtx.beginPath(); edCtx.moveTo(b.x+b.w*0.12,b.y+b.h*0.55); edCtx.lineTo(b.x+b.w*0.38,b.y+b.h*0.82); edCtx.lineTo(b.x+b.w*0.88,b.y+b.h*0.16); edCtx.stroke(); }
+  } else if(l.type==='cross'){
+    const b=edBounds(l); if(b.w>2&&b.h>2){ edCtx.lineWidth=6; edCtx.beginPath(); edCtx.moveTo(b.x,b.y); edCtx.lineTo(b.x+b.w,b.y+b.h); edCtx.moveTo(b.x+b.w,b.y); edCtx.lineTo(b.x,b.y+b.h); edCtx.stroke(); }
   } else if(l.type==='text'||l.type==='number'){
-    const fs=l.fontSize||18;
-    /* ✅ FIX: แก้ syntax */
-    edCtx.font = `bold ${fs}px Arial`;
-    edCtx.lineWidth=5;edCtx.strokeStyle='rgba(255,255,255,.9)';
-    edCtx.strokeText(l.text,l.x,l.y);
-    edCtx.fillStyle=col;edCtx.fillText(l.text,l.x,l.y);
-    if(sel){const m=edCtx.measureText(l.text);edSelBox(l.x-2,l.y-fs,m.width+4,fs+6);}
+    const fs=l.fontSize||18; edCtx.font = `bold ${fs}px Arial`; edCtx.lineWidth=5;edCtx.strokeStyle='rgba(255,255,255,.9)'; edCtx.strokeText(l.text,l.x,l.y); edCtx.fillStyle=col;edCtx.fillText(l.text,l.x,l.y);
   }
-  edCtx.restore();
+  if(sel){const b=edBounds(l); edSelBox(b.x,b.y,b.w,b.h);} edCtx.restore();
 }
-function edSelBox(x,y,w,h){
-  edCtx.save();
-  edCtx.setLineDash([5,4]);edCtx.strokeStyle='#1d4ed8';edCtx.lineWidth=2;
-  edCtx.strokeRect(x-3,y-3,w+6,h+6);edCtx.setLineDash([]);
-  edCtx.fillStyle='#1d4ed8';edCtx.fillRect(x+w-6,y+h-6,12,12);
-  edCtx.restore();
-}
-function edXY(e){
-  const r=edCanvas.getBoundingClientRect();
-  const sx=edCanvas.width/r.width,sy=edCanvas.height/r.height;
-  const src=e.touches?e.touches[0]:e;
-  return{x:(src.clientX-r.left)*sx,y:(src.clientY-r.top)*sy};
-}
+function edDrawAllLayers(){edLayers.forEach(l=>edDrawL(l,l===edSel));}
+function edSelBox(x,y,w,h){ edCtx.save(); edCtx.setLineDash([5,4]);edCtx.strokeStyle='#22c55e';edCtx.lineWidth=2; edCtx.strokeRect(x-3,y-3,w+6,h+6);edCtx.setLineDash([]); edCtx.fillStyle='#22c55e';edCtx.fillRect(x+w-6,y+h-6,12,12); edCtx.restore(); }
+function edXY(e){ const r=edCanvas.getBoundingClientRect(); const sx=edCanvas.width/r.width,sy=edCanvas.height/r.height; const src=e.touches?e.touches[0]:e; return{x:(src.clientX-r.left)*sx,y:(src.clientY-r.top)*sy}; }
+function edDistSeg(px,py,x1,y1,x2,y2){ const dx=x2-x1,dy=y2-y1,l2=dx*dx+dy*dy; if(!l2)return Math.hypot(px-x1,py-y1); const t=clamp(((px-x1)*dx+(py-y1)*dy)/l2,0,1); return Math.hypot(px-(x1+t*dx),py-(y1+t*dy)); }
 function edHit(x,y){
   for(let i=edLayers.length-1;i>=0;i--){
     const l=edLayers[i];
-    if(l.type==='circle'){
-      const rw=Math.abs(l.w)/2,rh=Math.abs(l.h)/2;
-      const cx=l.x+(l.w>0?rw:-rw),cy=l.y+(l.h>0?rh:-rh);
-      if(rw>0&&rh>0&&Math.pow((x-cx)/(rw+10),2)+Math.pow((y-cy)/(rh+10),2)<=1.2)return l;
-    } else if(l.type==='arrow'){
-      if(edDistSeg(x,y,l.x1,l.y1,l.x2,l.y2)<16)return l;
-    } else {
-      const fs=l.fontSize||18;
-      /* ✅ FIX */
-      edCtx.font = `bold ${fs}px Arial`;
-      const mw=edCtx.measureText(l.text||'').width;
-      if(x>=l.x-5&&x<=l.x+mw+5&&y>=l.y-fs-5&&y<=l.y+5)return l;
-    }
+    if(l.type==='pencil'){ const pts=Array.isArray(l.points)?l.points:[]; for(let j=1;j<pts.length;j++){ if(edDistSeg(x,y,pts[j-1].x,pts[j-1].y,pts[j].x,pts[j].y)<Math.max(10,(l.size||18)/3)) return l; } }
+    else if(l.type==='circle'){ const rw=Math.abs(l.w)/2,rh=Math.abs(l.h)/2; const cx=l.x+(l.w>0?rw:-rw),cy=l.y+(l.h>0?rh:-rh); if(rw>0&&rh>0&&Math.pow((x-cx)/(rw+10),2)+Math.pow((y-cy)/(rh+10),2)<=1.2)return l; }
+    else if(l.type==='rect'){ const b=edBounds(l); if(x>=b.x-8&&x<=b.x+b.w+8&&y>=b.y-8&&y<=b.y+b.h+8)return l; }
+    else if(l.type==='line' || l.type==='arrow'){ if(edDistSeg(x,y,l.x1,l.y1,l.x2,l.y2)<16)return l; }
+    else if(l.type==='check'){ const b=edBounds(l); if(edDistSeg(x,y,b.x+b.w*0.12,b.y+b.h*0.55,b.x+b.w*0.38,b.y+b.h*0.82)<16 || edDistSeg(x,y,b.x+b.w*0.38,b.y+b.h*0.82,b.x+b.w*0.88,b.y+b.h*0.16)<16)return l; }
+    else if(l.type==='cross'){ const b=edBounds(l); if(edDistSeg(x,y,b.x,b.y,b.x+b.w,b.y+b.h)<16 || edDistSeg(x,y,b.x+b.w,b.y,b.x,b.y+b.h)<16)return l; }
+    else { const fs=l.fontSize||18; edCtx.save(); edCtx.font = `bold ${fs}px Arial`; const mw=edCtx.measureText(l.text||'').width; edCtx.restore(); if(x>=l.x-5&&x<=l.x+mw+5&&y>=l.y-fs-5&&y<=l.y+5)return l; }
   }
   return null;
 }
-function edDistSeg(px,py,x1,y1,x2,y2){
-  const dx=x2-x1,dy=y2-y1,l2=dx*dx+dy*dy;
-  if(!l2)return Math.hypot(px-x1,py-y1);
-  const t=clamp(((px-x1)*dx+(py-y1)*dy)/l2,0,1);
-  return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));
-}
-edCanvas.addEventListener('pointerdown',ev=>{
-  ev.preventDefault();
-  const {x,y}=edXY(ev);
-  if(edTool==='select'){
-    edSel=edHit(x,y);
-    if(edSel){
-      edDrag=true;edCanvas.setPointerCapture(ev.pointerId);
-      if(edSel.type==='circle'){edDOX=x-edSel.x;edDOY=y-edSel.y;}
-      else if(edSel.type==='arrow'){edDOX=x-edSel.x1;edDOY=y-edSel.y1;}
-      else{edDOX=x-edSel.x;edDOY=y-edSel.y;}
-    }
-    edRedraw();return;
-  }
-  if(edTool==='text'||edTool==='number'){
-    edPendXY={x,y};
-    const src=ev.touches?ev.touches[0]:ev;
-    edTextPop.style.left=clamp(src.clientX,10,window.innerWidth-230)+'px';
-    edTextPop.style.top=clamp(src.clientY+14,10,window.innerHeight-90)+'px';
-    edTF.value=edTool==='number'?String(edNumCnt+1):'';
-    edTextPop.classList.add('open');
-    setTimeout(()=>edTF.focus(),60);
-    return;
-  }
-  edPushUndo();edDrawing=true;edDS={x,y};
-  edCanvas.setPointerCapture(ev.pointerId);
-  if(edTool==='circle')edLayers.push({type:'circle',x,y,w:0,h:0,color:edColor});
-  else edLayers.push({type:'arrow',x1:x,y1:y,x2:x,y2:y,color:edColor});
-},{passive:false});
-edCanvas.addEventListener('pointermove',ev=>{
-  ev.preventDefault();
-  const {x,y}=edXY(ev);
-  if(edDrag&&edSel){
-    const l=edSel;
-    if(l.type==='circle'){l.x=x-edDOX;l.y=y-edDOY;}
-    else if(l.type==='arrow'){const dx=x-edDOX-l.x1,dy=y-edDOY-l.y1;l.x1+=dx;l.y1+=dy;l.x2+=dx;l.y2+=dy;edDOX=x-l.x1;edDOY=y-l.y1;}
-    else{l.x=x-edDOX;l.y=y-edDOY;}
-    edRedraw();return;
-  }
-  if(edDrawing&&edLayers.length){
-    const l=edLayers[edLayers.length-1];
-    if(l.type==='circle'){l.w=x-edDS.x;l.h=y-edDS.y;}
-    else if(l.type==='arrow'){l.x2=x;l.y2=y;}
-    edRedraw();
-  }
-},{passive:false});
-edCanvas.addEventListener('pointerup',ev=>{
-  ev.preventDefault();
-  if(edDrag){edDrag=false;schedSave();}
-  if(edDrawing){
-    edDrawing=false;
-    const l=edLayers[edLayers.length-1];
-    if(l&&l.type==='circle'&&Math.abs(l.w)<6&&Math.abs(l.h)<6)edLayers.pop();
-    else if(l&&l.type==='arrow'&&Math.hypot(l.x2-l.x1,l.y2-l.y1)<8)edLayers.pop();
-    edRedraw();schedSave();
-  }
-},{passive:false});
-edCanvas.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
-document.addEventListener('keydown',e=>{
-  if(!edOverlay.classList.contains('open'))return;
-  if((e.key==='Delete'||e.key==='Backspace')&&document.activeElement!==edTF){
-    if(edSel){edPushUndo();edLayers.splice(edLayers.indexOf(edSel),1);edSel=null;edRedraw();schedSave();}
-  }
-});
-document.getElementById('etTOk').onclick=()=>{
-  const val=edTF.value.trim();if(!val){edTextPop.classList.remove('open');return;}
-  edPushUndo();
-  const fs=parseInt(edFSel.value)||18;
-  if(edTool==='number'){edNumCnt++;edLayers.push({type:'number',text:String(edNumCnt),x:edPendXY.x,y:edPendXY.y,fontSize:fs,color:edColor});}
-  else edLayers.push({type:'text',text:val,x:edPendXY.x,y:edPendXY.y,fontSize:fs,color:edColor});
-  edTextPop.classList.remove('open');edRedraw();schedSave();
-};
-document.getElementById('etTCx').onclick=()=>edTextPop.classList.remove('open');
-edTF.addEventListener('keydown',e=>{
-  if(e.key==='Enter')document.getElementById('etTOk').click();
-  if(e.key==='Escape')document.getElementById('etTCx').click();
-});
 function edPushUndo(){edUndo.push(JSON.stringify(edLayers));if(edUndo.length>50)edUndo.shift();}
-document.getElementById('etUndo').onclick=()=>{
-  if(!edUndo.length){setStatus('ไม่มีอะไรให้ Undo',false);return;}
-  edLayers=JSON.parse(edUndo.pop());edSel=null;edRedraw();
-};
-document.getElementById('etClr').onclick=()=>{
-  if(!confirm('ล้าง annotation ทั้งหมด?'))return;
-  edPushUndo();edLayers=[];edNumCnt=0;edSel=null;edRedraw();
-};
+function edIsBoxType(l){ return l && ['circle','rect','check','cross'].includes(l.type); }
+function edIsLineType(l){ return l && ['line','arrow'].includes(l.type); }
+function edCreateShape(tool,x,y,color){ if(tool==='pencil') return {type:'pencil',points:[{x,y}],color,size:(parseInt(edFSel.value)||18)}; if(tool==='circle') return {type:'circle',x,y,w:0,h:0,color}; if(tool==='rect') return {type:'rect',x,y,w:0,h:0,color}; if(tool==='check') return {type:'check',x,y,w:0,h:0,color}; if(tool==='cross') return {type:'cross',x,y,w:0,h:0,color}; if(tool==='line') return {type:'line',x1:x,y1:y,x2:x,y2:y,color}; return {type:'arrow',x1:x,y1:y,x2:x,y2:y,color}; }
+function edShapeTiny(l){ if(!l) return true; if(l.type==='pencil') return !Array.isArray(l.points) || l.points.length<2; if(edIsBoxType(l)) return Math.abs(l.w)<6 && Math.abs(l.h)<6; if(edIsLineType(l)) return Math.hypot(l.x2-l.x1,l.y2-l.y1)<8; return false; }
+edCanvas.addEventListener('pointerdown',ev=>{ ev.preventDefault(); const {x,y}=edXY(ev); if(edTool==='select'){ edSel=edHit(x,y); if(edSel){ edDrag=true;edCanvas.setPointerCapture(ev.pointerId); if(edSel.type==='pencil'){edDOX=x;edDOY=y;} else if(edIsBoxType(edSel)){edDOX=x-edSel.x;edDOY=y-edSel.y;} else if(edIsLineType(edSel)){edDOX=x-edSel.x1;edDOY=y-edSel.y1;} else{edDOX=x-edSel.x;edDOY=y-edSel.y;} } edRedraw();return; } if(edTool==='text'||edTool==='number'){ edPendXY={x,y}; const src=ev.touches?ev.touches[0]:ev; edTextPop.style.left=clamp(src.clientX,10,window.innerWidth-260)+'px'; edTextPop.style.top=clamp(src.clientY+14,10,window.innerHeight-120)+'px'; edTF.value=edTool==='number'?String(edNumCnt+1):''; edTextPop.classList.add('open'); setTimeout(()=>edTF.focus(),60); return; } edPushUndo();edDrawing=true;edDS={x,y}; edCanvas.setPointerCapture(ev.pointerId); edLayers.push(edCreateShape(edTool,x,y,edColor)); },{passive:false});
+edCanvas.addEventListener('pointermove',ev=>{ ev.preventDefault(); const {x,y}=edXY(ev); if(edDrag&&edSel){ const l=edSel; if(l.type==='pencil'){ const dx=x-edDOX,dy=y-edDOY; l.points=l.points.map(p=>({x:p.x+dx,y:p.y+dy})); edDOX=x;edDOY=y; } else if(edIsBoxType(l)){l.x=x-edDOX;l.y=y-edDOY;} else if(edIsLineType(l)){const nx=x-edDOX,ny=y-edDOY,dx=nx-l.x1,dy=ny-l.y1;l.x1+=dx;l.y1+=dy;l.x2+=dx;l.y2+=dy;} else{l.x=x-edDOX;l.y=y-edDOY;} edRedraw();return; } if(edDrawing&&edLayers.length){ const l=edLayers[edLayers.length-1]; if(l.type==='pencil'){ l.points.push({x,y}); } else if(edIsBoxType(l)){l.w=x-edDS.x;l.h=y-edDS.y;} else if(edIsLineType(l)){l.x2=x;l.y2=y;} edRedraw(); } },{passive:false});
+edCanvas.addEventListener('pointerup',ev=>{ ev.preventDefault(); if(edDrag){edDrag=false;schedSave();} if(edDrawing){ edDrawing=false; const l=edLayers[edLayers.length-1]; if(edShapeTiny(l)) edLayers.pop(); edRedraw();schedSave(); } },{passive:false});
+edCanvas.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
+document.addEventListener('keydown',e=>{ if(!edOverlay.classList.contains('open'))return; if((e.key==='Delete'||e.key==='Backspace')&&document.activeElement!==edTF){ if(edSel){edPushUndo();edLayers.splice(edLayers.indexOf(edSel),1);edSel=null;edRedraw();schedSave();} } });
+document.getElementById('etTOk').onclick=()=>{ const val=edTF.value.trim();if(!val){edTextPop.classList.remove('open');return;} edPushUndo(); const fs=parseInt(edFSel.value)||18; if(edTool==='number'){edNumCnt++;edLayers.push({type:'number',text:String(edNumCnt),x:edPendXY.x,y:edPendXY.y,fontSize:fs,color:edColor});} else edLayers.push({type:'text',text:val,x:edPendXY.x,y:edPendXY.y,fontSize:fs,color:edColor}); edTextPop.classList.remove('open');edRedraw();schedSave(); };
+document.getElementById('etTCx').onclick=()=>edTextPop.classList.remove('open');
+edTF.addEventListener('keydown',e=>{ if(e.key==='Enter')document.getElementById('etTOk').click(); if(e.key==='Escape')document.getElementById('etTCx').click(); });
+document.getElementById('etUndo').onclick=()=>{ if(!edUndo.length){setStatus('ไม่มีอะไรให้ Undo',false);return;} edLayers=JSON.parse(edUndo.pop());edSel=null;edRedraw(); };
+document.getElementById('etClr').onclick=()=>{ if(!confirm('ล้าง annotation ทั้งหมด?'))return; edPushUndo();edLayers=[];edNumCnt=0;edSel=null;edRedraw(); };
+function edBuildFlatDataUrl(thumb){ return new Promise(res=>{ const baseUrl=thumb&&thumb._baseUrl||''; if(!baseUrl){res('');return;} const img=new Image(); img.onload=()=>{ const W=img.naturalWidth||edW||800,H=img.naturalHeight||edH||600; const c=document.createElement('canvas'); c.width=W;c.height=H; const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,W,H); (thumb._layers||[]).forEach(l=>drawLayerCtx(ctx,l,1,1,W,H)); try{ res(c.toDataURL('image/jpeg',.92)); }catch(_){ res(baseUrl); } }; img.onerror=()=>res(baseUrl); img.src=baseUrl; }); }
+function edRefreshThumb(thumb){ return new Promise(async res=>{ if(!thumb){res();return;} const baseImg=thumb.querySelector('.thumb-base-img'); const doRender=async()=>{ const sw=edW,sh=edH; edW=(baseImg&&baseImg.naturalWidth)||edW||800; edH=(baseImg&&baseImg.naturalHeight)||edH||600; updateThumbAnnotation(thumb); const fi=thumb.querySelector('.thumb-flat-print'); if(fi){ fi.src = await edBuildFlatDataUrl(thumb); } edW=sw;edH=sh; res(); }; if(baseImg && (!baseImg.complete || !baseImg.naturalWidth)){ baseImg.addEventListener('load',()=>{doRender();},{once:true}); baseImg.addEventListener('error',()=>res(),{once:true}); } else { await doRender(); } }); }
+
 function updateThumbAnnotation(thumb){
   let ac=thumb.querySelector('canvas.thumb-ann-canvas');
   if(!ac){
@@ -587,12 +577,12 @@ function updateThumbAnnotation(thumb){
   const sx=tw/edW,sy=th2/edH;
   (thumb._layers||[]).forEach(l=>drawLayerCtx(ctx,l,sx,sy,tw,th2));
 }
-document.getElementById('etDone').onclick=()=>{
+document.getElementById('etDone').onclick=async()=>{
   if(!edThumb)return;
   edThumb._layers=JSON.parse(JSON.stringify(edLayers));
-  updateThumbAnnotation(edThumb);
+  await edRefreshThumb(edThumb);
   edOverlay.classList.remove('open');
-  schedSave();setStatus('บันทึก annotation แล้ว');
+  schedSave();setStatus('บันทึกรูปภาพแล้ว');
 };
 document.getElementById('etCxl').onclick=()=>{edOverlay.classList.remove('open');setStatus('ยกเลิกการแก้ไข');};
 /* ══ THUMB ══ */
