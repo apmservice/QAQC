@@ -52,6 +52,13 @@ td,th{border:1px solid var(--border);padding:0;vertical-align:top;font-size:11px
 .thumb .thumb-base-img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;z-index:1}
 .thumb .thumb-ann-canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block;pointer-events:none;z-index:2}
 .thumb-flat-print{display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;z-index:5;pointer-events:none}
+.image-grid.single-thumb,.remark-grid.single-thumb{display:block!important;padding:3px!important;overflow:hidden!important;min-height:0!important}
+.field-before.single-thumb,.field-after.single-thumb{flex:1 1 auto;min-height:0!important}
+.field-before.single-thumb .thumb,.field-after.single-thumb .thumb{height:100%!important;min-height:0!important;width:100%!important}
+.remark-grid.single-thumb{flex:1 1 auto!important;min-height:72px!important}
+.remark-grid.single-thumb .thumb{height:100%!important;min-height:72px!important;width:100%!important;flex:none!important}
+.image-grid.single-thumb .thumb-base-img,.image-grid.single-thumb .thumb-ann-canvas,.image-grid.single-thumb .thumb-flat-print,.remark-grid.single-thumb .thumb-base-img,.remark-grid.single-thumb .thumb-ann-canvas,.remark-grid.single-thumb .thumb-flat-print{width:100%!important;height:100%!important;object-fit:contain!important}
+
 .thumb-edit-btn{position:absolute;bottom:3px;right:3px;width:28px;height:28px;border:1px solid #555;border-radius:6px;background:rgba(255,255,255,.95);font-size:14px;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;padding:0;-webkit-tap-highlight-color:transparent}
 .thumb-del-btn{position:absolute;top:3px;right:3px;width:26px;height:26px;border:1px solid #777;border-radius:50%;background:rgba(255,255,255,.95);font-size:15px;cursor:pointer;z-index:10;display:flex;align-items:center;justify-content:center;padding:0;-webkit-tap-highlight-color:transparent}
 .remark-grid{flex:1 1 auto;display:flex;flex-direction:row;align-items:stretch;gap:4px;overflow-x:auto;min-height:60px}
@@ -127,6 +134,11 @@ td,th{border:1px solid var(--border);padding:0;vertical-align:top;font-size:11px
 .spdf-stage .inspection-head-scroll,.spdf-stage .inspection-body-scroll{overflow:visible!important;max-height:none!important}
 .spdf-stage .inspection-head-scroll{padding-right:0!important;--sbw:0px!important}
 .spdf-stage .hdr-hidden{display:block!important}
+.spdf-stage .remark-wrap{overflow:visible!important}
+.spdf-stage .remark-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:4px!important;overflow:visible!important;min-height:0!important;align-content:start!important;align-items:stretch!important}
+.spdf-stage .remark-grid .thumb{width:100%!important;min-width:0!important;flex:none!important;height:58px!important;min-height:58px!important}
+.spdf-stage .image-grid.single-thumb,.spdf-stage .remark-grid.single-thumb{display:block!important;padding:3px!important;overflow:hidden!important;min-height:0!important}
+.spdf-stage .image-grid.single-thumb .thumb,.spdf-stage .remark-grid.single-thumb .thumb{width:100%!important;height:100%!important;min-height:0!important;flex:none!important}
 .spdf-stage table.hdr-hidden{display:table!important;width:100%!important}
 .spdf-stage .ftr-hidden{display:table!important;width:100%!important}
 @media print{
@@ -139,7 +151,11 @@ td,th{border:1px solid var(--border);padding:0;vertical-align:top;font-size:11px
   .inspection-head-scroll{padding-right:0!important;--sbw:0px!important}
   .hdr-hidden{display:block!important}
   table.hdr-hidden{display:table!important;width:100%!important}
-  .ftr-hidden{display:table!important;width:100%!important}
+  .remark-wrap{overflow:visible!important}
+  .remark-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:4px!important;overflow:visible!important;min-height:0!important;align-content:start!important;align-items:stretch!important}
+  .remark-grid .thumb{width:100%!important;min-width:0!important;flex:none!important;height:58px!important;min-height:58px!important}
+  .image-grid.single-thumb,.remark-grid.single-thumb{display:block!important;padding:3px!important;overflow:hidden!important;min-height:0!important}
+  .image-grid.single-thumb .thumb,.remark-grid.single-thumb .thumb{width:100%!important;height:100%!important;min-height:0!important;flex:none!important}
   /* print: ซ่อน base+ann แสดง flat */
   .thumb-base-img,.thumb-ann-canvas{visibility:hidden}
   .thumb-flat-print{display:block!important}
@@ -149,6 +165,38 @@ td,th{border:1px solid var(--border);padding:0;vertical-align:top;font-size:11px
 body.pdf-exp .toolbar,.pdf-exp .thumb-edit-btn,.pdf-exp .thumb-del-btn,.pdf-exp .btn-upload,.pdf-exp .media-toolbar,.pdf-exp .fullscreen-fab{display:none!important}
 body.pdf-exp .inspection-head-scroll,.pdf-exp .inspection-body-scroll{overflow:visible!important;max-height:none!important}
 body.pdf-exp .inspection-head-scroll{padding-right:0!important;--sbw:0px!important}
+body.pdf-exp .remark-wrap,.pdf-exp .remark-wrap{overflow:visible!important}
+body.pdf-exp .remark-grid,.pdf-exp .remark-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:4px!important;overflow:visible!important;min-height:0!important;align-content:start!important;align-items:stretch!important}
+body.pdf-exp .remark-grid .thumb,.pdf-exp .remark-grid .thumb{width:100%!important;min-width:0!important;flex:none!important;height:58px!important;min-height:58px!important}
+body.pdf-exp .image-grid.single-thumb,.pdf-exp .image-grid.single-thumb,body.pdf-exp .remark-grid.single-thumb,.pdf-exp .remark-grid.single-thumb{display:block!important;padding:3px!important;overflow:hidden!important;min-height:0!important}
+body.pdf-exp .image-grid.single-thumb .thumb,.pdf-exp .image-grid.single-thumb .thumb,body.pdf-exp .remark-grid.single-thumb .thumb,.pdf-exp .remark-grid.single-thumb .thumb{width:100%!important;height:100%!important;min-height:0!important;flex:none!important}
+.spdf-stage .remark-wrap.remark-no-text .remark-text,.spdf-stage .remark-wrap.remark-no-text .field-remark-text{display:none!important}
+.spdf-stage .remark-wrap.remark-no-text .remark-grid{display:grid!important;height:100%!important;min-height:0!important;flex:1 1 auto!important;align-content:stretch!important;align-items:stretch!important;gap:4px!important;padding:4px!important;overflow:hidden!important}
+.spdf-stage .remark-wrap.remark-no-text.remark-imgcount-1 .remark-grid{display:block!important}
+.spdf-stage .remark-wrap.remark-no-text.remark-imgcount-2 .remark-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:minmax(0,1fr)!important}
+.spdf-stage .remark-wrap.remark-no-text.remark-imgcount-3 .remark-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
+.spdf-stage .remark-wrap.remark-no-text.remark-imgcount-3 .remark-grid .thumb:first-child{grid-column:1 / span 2!important}
+.spdf-stage .remark-wrap.remark-no-text.remark-imgcount-4 .remark-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
+.spdf-stage .remark-wrap.remark-no-text .remark-grid .thumb{width:100%!important;height:100%!important;min-height:0!important;min-width:0!important;flex:none!important}
+.spdf-stage .remark-wrap.remark-no-text .remark-grid .thumb img{width:100%!important;height:100%!important;object-fit:contain!important}
+@media print{
+  .remark-wrap.remark-no-text .remark-text,.remark-wrap.remark-no-text .field-remark-text{display:none!important}
+  .remark-wrap.remark-no-text .remark-grid{display:grid!important;height:100%!important;min-height:0!important;flex:1 1 auto!important;align-content:stretch!important;align-items:stretch!important;gap:4px!important;padding:4px!important;overflow:hidden!important}
+  .remark-wrap.remark-no-text.remark-imgcount-1 .remark-grid{display:block!important}
+  .remark-wrap.remark-no-text.remark-imgcount-2 .remark-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:minmax(0,1fr)!important}
+  .remark-wrap.remark-no-text.remark-imgcount-3 .remark-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
+  .remark-wrap.remark-no-text.remark-imgcount-3 .remark-grid .thumb:first-child{grid-column:1 / span 2!important}
+  .remark-wrap.remark-no-text.remark-imgcount-4 .remark-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
+  .remark-wrap.remark-no-text .remark-grid .thumb{width:100%!important;height:100%!important;min-height:0!important;min-width:0!important;flex:none!important}
+}
+body.pdf-exp .remark-wrap.remark-no-text .remark-text,.pdf-exp .remark-wrap.remark-no-text .remark-text,body.pdf-exp .remark-wrap.remark-no-text .field-remark-text,.pdf-exp .remark-wrap.remark-no-text .field-remark-text{display:none!important}
+body.pdf-exp .remark-wrap.remark-no-text .remark-grid,.pdf-exp .remark-wrap.remark-no-text .remark-grid{display:grid!important;height:100%!important;min-height:0!important;flex:1 1 auto!important;align-content:stretch!important;align-items:stretch!important;gap:4px!important;padding:4px!important;overflow:hidden!important}
+body.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-1 .remark-grid,.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-1 .remark-grid{display:block!important}
+body.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-2 .remark-grid,.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-2 .remark-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:minmax(0,1fr)!important}
+body.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-3 .remark-grid,.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-3 .remark-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
+body.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-3 .remark-grid .thumb:first-child,.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-3 .remark-grid .thumb:first-child{grid-column:1 / span 2!important}
+body.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-4 .remark-grid,.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-4 .remark-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
+body.pdf-exp .remark-wrap.remark-no-text .remark-grid .thumb,.pdf-exp .remark-wrap.remark-no-text .remark-grid .thumb{width:100%!important;height:100%!important;min-height:0!important;min-width:0!important;flex:none!important}
 @media(max-width:1080px){.wrap{padding:0 0 70px}.sheet{width:100%;border-left:none;border-right:none}.inspection-head-scroll table,.inspection-body-scroll table{min-width:1100px}}
 @media(max-width:640px){td,th{font-size:10px}.row td{height:160px}.btn-upload{font-size:12px;min-height:32px}.tool-btn{min-height:44px;font-size:13px;padding:6px 10px}}
   </style>
@@ -607,7 +655,7 @@ function makeThumb(baseUrl,isRemark,layers){
   d.appendChild(eb);
   const db=document.createElement('button');
   db.type='button';db.className='thumb-del-btn';db.setAttribute('aria-label','ลบ');db.textContent='×';
-  db.onclick=e=>{e.stopPropagation();d.remove();schedSave();};
+  db.onclick=e=>{e.stopPropagation();const g=d.closest('.image-grid');d.remove();syncSingleThumbLayout(g);schedSave();};
   d.appendChild(db);
   if(layers&&layers.length){
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
@@ -626,6 +674,27 @@ function makeThumb(baseUrl,isRemark,layers){
 }
 function getGridData(grid){
   return[...grid.querySelectorAll('.thumb')].map(t=>({base:t._baseUrl||'',layers:t._layers||[]})).filter(t=>t.base);
+}
+function syncSingleThumbLayout(grid){
+  if(!grid)return;
+  const count=grid.querySelectorAll('.thumb').length;
+  grid.classList.toggle('single-thumb',count===1);
+}
+function syncRemarkExportLayout(scope=document){
+  (scope||document).querySelectorAll('.remark-wrap').forEach(wrap=>{
+    const txtEl=wrap.querySelector('.field-remark-text')||wrap.querySelector('.remark-text');
+    const grid=wrap.querySelector('.field-remark-images')||wrap.querySelector('.remark-grid');
+    const hasText=!!getText(txtEl).trim();
+    const imgCount=grid?grid.querySelectorAll('.thumb').length:0;
+    wrap.classList.toggle('remark-no-text',!hasText);
+    ['remark-imgcount-0','remark-imgcount-1','remark-imgcount-2','remark-imgcount-3','remark-imgcount-4'].forEach(cls=>wrap.classList.remove(cls));
+    wrap.classList.add('remark-imgcount-'+Math.min(4,Math.max(0,imgCount)));
+  });
+}
+function clearRemarkExportLayout(scope=document){
+  (scope||document).querySelectorAll('.remark-wrap').forEach(wrap=>{
+    wrap.classList.remove('remark-no-text','remark-imgcount-0','remark-imgcount-1','remark-imgcount-2','remark-imgcount-3','remark-imgcount-4');
+  });
 }
 /* ══ ✅ FIX: เพิ่มฟังก์ชัน getRenderedImagesFromGrid ══ */
 function getRenderedImagesFromGrid(grid){
@@ -674,10 +743,11 @@ function bindInput(inp){
       ph.textContent='กำลังย่อ…';grid.appendChild(ph);
       try{
         const url=await compressImg(f,1800);
-        if(url){const t=makeThumb(url,isRemark,[]);ph.replaceWith(t);}
-        else ph.remove();
+        if(url){const t=makeThumb(url,isRemark,[]);ph.replaceWith(t);syncSingleThumbLayout(grid);}
+        else{ph.remove();syncSingleThumbLayout(grid);}
       }catch(e){console.error(e);ph.remove();}
     }
+    syncSingleThumbLayout(grid);
     inp.value='';schedSave();
   };
 }
@@ -720,6 +790,7 @@ function applyRow(row,data){
       const layers=typeof item==='object'?(item.layers||[]):[];
       if(base)g.appendChild(makeThumb(base,isR,layers));
     });
+    syncSingleThumbLayout(g);
   });
 }
 function renumber(){
@@ -737,7 +808,9 @@ function appendRow(data){
   const idx=tbody.querySelectorAll('tr.row').length+1;
   tbody.insertAdjacentHTML('beforeend',ROW_TPL.replaceAll('__I__',String(idx)));
   const row=tbody.lastElementChild;
-  bindRow(row);applyRow(row,data);renumber();updateVH();return row;
+  bindRow(row);applyRow(row,data);
+  row.querySelectorAll('.image-grid').forEach(syncSingleThumbLayout);
+  renumber();updateVH();return row;
 }
 function initRows(n=1){tbody.innerHTML='';for(let i=0;i<n;i++)appendRow();renumber();}
 /* ══ DATA ══ */
@@ -874,6 +947,7 @@ function cleanupFlatImgs(injected){
 async function doPdfPrint(){
   const ph=hdrH,pf=ftrH;
   setStatus('⏳ กำลัง flatten รูปก่อน Print…');
+  syncRemarkExportLayout(document);
   const thumbs=[...document.querySelectorAll('.thumb')];
   const flatUrls=await Promise.all(thumbs.map(t=>flattenThumb(t)));
   const injected=await injectFlatImgs(thumbs,flatUrls);
@@ -886,6 +960,7 @@ async function doPdfPrint(){
     window.print();
     setTimeout(()=>{
       cleanupFlatImgs(injected);
+      clearRemarkExportLayout(document);
       document.body.classList.remove('pdf-exp');
       if(iHS)iHS.style.removeProperty('--sbw');
       hdrH=ph;ftrH=pf;applyHdr();applyFtr();
@@ -910,6 +985,7 @@ async function doSharePdf(){
     clone.querySelectorAll('.inspection-head-scroll,.inspection-body-scroll').forEach(el=>{el.style.overflow='visible';el.style.maxHeight='none';});
     clone.querySelectorAll('.inspection-head-scroll').forEach(el=>{el.style.setProperty('--sbw','0px');el.style.paddingRight='0';});
     clone.querySelectorAll('.toolbar,.thumb-edit-btn,.thumb-del-btn,.btn-upload,.media-toolbar,.fullscreen-fab').forEach(el=>el.remove());
+    syncRemarkExportLayout(clone);
     clone.querySelectorAll('.thumb').forEach((ct,i)=>{
       const live=liveThumbs[i];
       const url=flatUrls[i]||'';
@@ -923,9 +999,19 @@ async function doSharePdf(){
       if(live){
         ct.style.height=(live.clientHeight||90)+'px';
         ct.style.minHeight='0';ct.style.aspectRatio='auto';
-        if(ct.classList.contains('remark-img')){
-          ct.style.width=(live.clientWidth||120)+'px';
-          ct.style.flex='0 0 '+(live.clientWidth||120)+'px';
+        const grid=ct.closest('.image-grid');
+        if(grid&&grid.classList.contains('single-thumb')){
+          ct.style.width='100%';
+          ct.style.minWidth='0';
+          ct.style.flex='none';
+          ct.style.height='100%';
+          ct.style.minHeight='0';
+        }else if(ct.classList.contains('remark-img')){
+          ct.style.width='100%';
+          ct.style.minWidth='0';
+          ct.style.flex='none';
+          ct.style.height='58px';
+          ct.style.minHeight='58px';
         }
       }
     });
@@ -1413,6 +1499,7 @@ function buildXlsxFileMap(payload){
     setCell(rowNum,8,htmlToPlainText(r.problem||''),style.left);
     setCell(rowNum,24,r.pass?'✓':'',style.center);
     setCell(rowNum,25,r.reject?'✓':'',style.center);
+    const remarkTextPlain=htmlToPlainText(r.remarkText||'').trim();
     setCell(rowNum,26,htmlToPlainText(r.remarkText||'-'),style.left);
     /* ✅ FIX: ใช้ remarkImages จาก payload ที่ส่งมาถูกต้อง */
     const before=Array.isArray(r.before)?r.before.slice(0,4):[];
@@ -1420,7 +1507,7 @@ function buildXlsxFileMap(payload){
     const remImgs=Array.isArray(r.remarkImages)?r.remarkImages.slice(0,4):[];
     placeImagesDynamic(before,16,20,rowNum,rowNum+1);
     placeImagesDynamic(after,20,24,rowNum,rowNum+1);
-    placeRemarkImages(remImgs,26,32,rowNum+0.33,rowNum+1);
+    placeRemarkImages(remImgs,26,32,remarkTextPlain ? (rowNum+0.33) : rowNum,rowNum+1);
   });
 
   setCell(footerRow1,2,payload.footer?.date||'Date',style.header);
@@ -1591,3 +1678,5 @@ excelBtn.onclick=async()=>{
 
 })();
 </script>
+</body>
+</html>
