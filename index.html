@@ -40,7 +40,10 @@ td,th{border:1px solid var(--border);padding:0;vertical-align:top;font-size:11px
 .inspection-body-scroll::-webkit-scrollbar{height:10px;width:10px}
 .editable-box{width:100%;min-height:100%;padding:2px 4px;outline:none;border:none;background:transparent;font:inherit;color:inherit;white-space:pre-wrap;overflow-wrap:break-word}
 .meta .editable-box{min-height:14px;padding:0 2px}
-.footer .editable-box{min-height:17px;padding:1px 2px;text-align:center}
+ .footer .editable-box{min-height:17px;padding:1px 2px;text-align:center}
+.footer-label-row td{height:24px;font-weight:700;font-size:12px;text-align:center!important;vertical-align:middle!important}
+.footer-value-row td{height:25px;text-align:center!important;vertical-align:middle!important}
+.footer-value-row .editable-box{min-height:24px;height:100%;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;line-height:1.15!important;padding:0 2px!important}
 .row td{height:186px}
 .media-cell,.remark-cell{padding:2px}
 .media-wrap,.remark-wrap{display:flex;flex-direction:column;height:100%;min-height:180px;gap:4px;padding:2px}
@@ -141,6 +144,8 @@ td,th{border:1px solid var(--border);padding:0;vertical-align:top;font-size:11px
 .spdf-stage .image-grid.single-thumb .thumb,.spdf-stage .remark-grid.single-thumb .thumb{width:100%!important;height:100%!important;min-height:0!important;flex:none!important}
 .spdf-stage table.hdr-hidden{display:table!important;width:100%!important}
 .spdf-stage .ftr-hidden{display:table!important;width:100%!important}
+.spdf-stage .footer-value-row td,.pdf-exp .footer-value-row td{text-align:center!important;vertical-align:middle!important}
+.spdf-stage .footer-value-row .editable-box,.pdf-exp .footer-value-row .editable-box{display:flex!important;align-items:center!important;justify-content:center!important;height:100%!important;text-align:center!important;line-height:1.15!important;padding:0 2px!important}
 @media print{
   html,body{margin:0!important;padding:0!important;background:#fff!important}
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -353,6 +358,18 @@ body.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-2 .remark-grid .thumb i
   body.auto-card-ui:not(.pdf-exp) .remark-grid .thumb{height:150px!important}
 }
 
+
+/* ===== FIX REMARK SINGLE IMAGE EXPORT PDF/SHARE PDF ===== */
+.spdf-stage .remark-wrap.remark-no-text.remark-imgcount-1 .remark-grid .thumb.single-portrait-fit img,
+.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-1 .remark-grid .thumb.single-portrait-fit img,
+.remark-wrap.remark-no-text.remark-imgcount-1 .remark-grid .thumb.single-portrait-fit img{
+  position:absolute!important;top:0!important;left:50%!important;height:100%!important;width:auto!important;max-width:none!important;transform:translateX(-50%)!important;object-fit:contain!important;display:block!important;
+}
+.spdf-stage .remark-wrap.remark-no-text.remark-imgcount-1 .remark-grid .thumb.single-landscape-fit img,
+.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-1 .remark-grid .thumb.single-landscape-fit img,
+.remark-wrap.remark-no-text.remark-imgcount-1 .remark-grid .thumb.single-landscape-fit img{
+  position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;
+}
 </style>
 </head>
 <body>
@@ -467,11 +484,17 @@ body.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-2 .remark-grid .thumb i
   <table class="spacer screen-ftr"><tr><td></td></tr></table>
   <table class="footer screen-ftr">
    <colgroup><col style="width:10.7%"><col style="width:39.7%"><col style="width:39.8%"><col style="width:9.8%"></colgroup>
-   <tr>
-    <td><div class="editable-box" contenteditable="true" data-footer="date">Date</div></td>
-    <td><div class="editable-box" contenteditable="true" data-footer="prepareBy">Prepare By</div></td>
-    <td><div class="editable-box" contenteditable="true" data-footer="approvedBy">Approved by</div></td>
-    <td><div class="editable-box" contenteditable="true" data-footer="page">Page</div></td>
+   <tr class="footer-label-row">
+    <td>Date</td>
+    <td>Prepare By</td>
+    <td>Approved by</td>
+    <td>Page</td>
+   </tr>
+   <tr class="footer-value-row">
+    <td><div class="editable-box" contenteditable="true" data-footer="date"></div></td>
+    <td><div class="editable-box" contenteditable="true" data-footer="prepareBy"></div></td>
+    <td><div class="editable-box" contenteditable="true" data-footer="approvedBy"></div></td>
+    <td><div class="editable-box" contenteditable="true" data-footer="page"></div></td>
    </tr>
   </table>
  </div>
@@ -877,7 +900,13 @@ function getExcelImagesFromGrid(grid){
       layers.forEach(l=>drawLayerCtx(ctx,l,1,1,ow,oh));
       overlay=cvs.toDataURL('image/png');
     }
-    return {base,overlay};
+    const baseImg=t.querySelector('.thumb-base-img');
+    return {
+      base,
+      overlay,
+      w: Math.max(1,(baseImg&&baseImg.naturalWidth)||0),
+      h: Math.max(1,(baseImg&&baseImg.naturalHeight)||0)
+    };
   }).filter(Boolean);
 }
 /* ══ FILE INPUT ══ */
@@ -976,7 +1005,7 @@ function collectData(){
   return{
     _v:7,
     meta:{reportCode:getMeta('reportCode'),revision:getMeta('revision'),plant:getMeta('plant'),machine:getMeta('machine'),jobScope:getMeta('jobScope')},
-    footer:{date:getFooterV('date'),prepareBy:getFooterV('prepareBy'),approvedBy:getFooterV('approvedBy'),page:getFooterV('page')},
+    footer:{date:getFooterV('date'),prepareBy:getFooterV('prepareBy'),approvedBy:getFooterV('approvedBy'),page:getFooterV('page'),extraInfo:getFooterV('extraInfo')},
     rows:[...tbody.querySelectorAll('tr.row')].map(extractRow),
   };
 }
@@ -985,8 +1014,8 @@ function restoreData(data){
   setMeta('reportCode',data.meta?.reportCode);setMeta('revision',data.meta?.revision);
   setMeta('plant',data.meta?.plant);setMeta('machine',data.meta?.machine);
   setMeta('jobScope',data.meta?.jobScope||'Boiler service');
-  setFooterV('date',data.footer?.date||'Date');setFooterV('prepareBy',data.footer?.prepareBy||'Prepare By');
-  setFooterV('approvedBy',data.footer?.approvedBy||'Approved by');setFooterV('page',data.footer?.page||'Page');
+  setFooterV('date',(data.footer?.date&&data.footer.date!=='Date')?data.footer.date:'');setFooterV('prepareBy',(data.footer?.prepareBy&&data.footer.prepareBy!=='Prepare By')?data.footer.prepareBy:'');
+  setFooterV('approvedBy',(data.footer?.approvedBy&&data.footer.approvedBy!=='Approved by')?data.footer.approvedBy:'');setFooterV('page',(data.footer?.page&&data.footer.page!=='Page')?data.footer.page:'');setFooterV('extraInfo',data.footer?.extraInfo||'');
   tbody.innerHTML='';
   const rows=Array.isArray(data.rows)&&data.rows.length?data.rows:[null];
   rows.forEach(rd=>appendRow(rd));
@@ -1097,6 +1126,53 @@ async function injectFlatImgs(thumbs,flatUrls){
 function cleanupFlatImgs(injected){
   injected.forEach(({fi})=>{if(fi){fi.src='';fi.style.display='none';}});
 }
+
+/* ✅ PDF/Share PDF image rule for Picture Before, Picture After, Remark
+   - Single portrait: fill top-bottom by aspect ratio, centered left-right
+   - Single landscape/square: fill full cell
+   - Uses !important to override Remark export CSS */
+function isPortraitThumb(thumb){
+  const img=thumb&&thumb.querySelector?thumb.querySelector('.thumb-base-img,img'):null;
+  const w=(img&&img.naturalWidth)||0;
+  const h=(img&&img.naturalHeight)||0;
+  return h>w;
+}
+function applyPdfSingleImageFitRule(cloneThumb, liveThumb){
+  const grid=cloneThumb&&cloneThumb.closest?cloneThumb.closest('.field-before,.field-after,.field-remark-images,.image-grid,.remark-grid'):null;
+  if(!grid)return;
+  const isTargetGrid=grid.classList.contains('field-before')||grid.classList.contains('field-after')||grid.classList.contains('field-remark-images')||grid.classList.contains('remark-grid');
+  if(!isTargetGrid)return;
+  const count=grid.querySelectorAll('.thumb').length;
+  const img=cloneThumb.querySelector('img');
+  if(!img||count!==1)return;
+  const portrait=isPortraitThumb(liveThumb)||isPortraitThumb(cloneThumb);
+  cloneThumb.classList.remove('single-portrait-fit','single-landscape-fit');
+  cloneThumb.classList.add(portrait?'single-portrait-fit':'single-landscape-fit');
+  cloneThumb.style.setProperty('width','100%','important');
+  cloneThumb.style.setProperty('height','100%','important');
+  cloneThumb.style.setProperty('min-height','0','important');
+  cloneThumb.style.setProperty('min-width','0','important');
+  cloneThumb.style.setProperty('flex','none','important');
+  cloneThumb.style.setProperty('overflow','hidden','important');
+  img.style.setProperty('position','absolute','important');
+  img.style.setProperty('display','block','important');
+  img.style.setProperty('top','0','important');
+  if(portrait){
+    img.style.setProperty('left','50%','important');
+    img.style.setProperty('height','100%','important');
+    img.style.setProperty('width','auto','important');
+    img.style.setProperty('max-width','none','important');
+    img.style.setProperty('transform','translateX(-50%)','important');
+    img.style.setProperty('object-fit','contain','important');
+  }else{
+    img.style.setProperty('left','0','important');
+    img.style.setProperty('width','100%','important');
+    img.style.setProperty('height','100%','important');
+    img.style.setProperty('object-fit','cover','important');
+    img.style.removeProperty('transform');
+  }
+}
+function applyPdfRemarkImageRule(cloneThumb, liveThumb){applyPdfSingleImageFitRule(cloneThumb,liveThumb);}
 /* ══ PDF PRINT ══ */
 async function doPdfPrint(){
   const fn='QAQC_'+new Date().toISOString().slice(0,10)+'.pdf';
@@ -1138,6 +1214,7 @@ async function doPdfPrint(){
         clone.querySelectorAll('.thumb').forEach(ct=>{
           const idx=Number(ct.getAttribute('data-export-idx')||'-1');
           const url=idx>=0?(flatUrls[idx]||''):'';
+          const live=idx>=0?liveThumbs[idx]:null;
           ct.innerHTML='';
           ct.removeAttribute('data-export-idx');
           if(url){
@@ -1161,6 +1238,7 @@ async function doPdfPrint(){
             ct.style.height='58px';
             ct.style.minHeight='58px';
           }
+          applyPdfRemarkImageRule(ct,live);
         });
 
         await new Promise(r=>{
@@ -1203,87 +1281,57 @@ document.getElementById('btnPdf').onclick=doPdfPrint;
 /* ══ SHARE PDF ══ */
 async function doSharePdf(){
   const fn='QAQC_'+new Date().toISOString().slice(0,10)+'.pdf';
-  setStatus('⏳ กำลัง flatten รูปและสร้าง PDF…');
+  const rowsPerPage=3;
+  setStatus('⏳ กำลัง flatten รูปและสร้าง PDF สำหรับ Share…');
+  let liveThumbs=[];
   try{
     if(typeof html2canvas==='undefined'||!window.jspdf?.jsPDF)throw new Error('lib not loaded');
-    const liveThumbs=[...document.querySelectorAll('.thumb')];
+    liveThumbs=[...document.querySelectorAll('.thumb')];
+    liveThumbs.forEach((t,i)=>t.setAttribute('data-export-idx',String(i)));
     const flatUrls=await Promise.all(liveThumbs.map(t=>flattenThumb(t)));
     const src=document.querySelector('.sheet');
-    const stage=document.createElement('div');stage.className='spdf-stage';
-    const clone=src.cloneNode(true);stage.appendChild(clone);document.body.appendChild(stage);
-    clone.querySelectorAll('.screen-hdr').forEach(el=>el.classList.remove('hdr-hidden'));
-    clone.querySelectorAll('.screen-ftr').forEach(el=>{el.classList.remove('ftr-hidden');el.style.display='';});
-    clone.querySelectorAll('.inspection-head-scroll,.inspection-body-scroll').forEach(el=>{el.style.overflow='visible';el.style.maxHeight='none';});
-    clone.querySelectorAll('.inspection-head-scroll').forEach(el=>{el.style.setProperty('--sbw','0px');el.style.paddingRight='0';});
-    clone.querySelectorAll('.toolbar,.thumb-edit-btn,.thumb-del-btn,.btn-upload,.media-toolbar,.fullscreen-fab').forEach(el=>el.remove());
-    syncRemarkExportLayout(clone);
-    clone.querySelectorAll('.thumb').forEach((ct,i)=>{
-      const live=liveThumbs[i];
-      const url=flatUrls[i]||'';
-      ct.innerHTML='';
-      if(url){
-        const img=document.createElement('img');
-        img.src=url;
-        img.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block;';
-        ct.appendChild(img);
-      }
-      if(live){
-        ct.style.height=(live.clientHeight||90)+'px';
-        ct.style.minHeight='0';ct.style.aspectRatio='auto';
-        const grid=ct.closest('.image-grid');
-        if(grid&&grid.classList.contains('single-thumb')){
-          ct.style.width='100%';
-          ct.style.minWidth='0';
-          ct.style.flex='none';
-          ct.style.height='100%';
-          ct.style.minHeight='0';
-        }else if(ct.classList.contains('remark-img')){
-          ct.style.width='100%';
-          ct.style.minWidth='0';
-          ct.style.flex='none';
-          ct.style.height='58px';
-          ct.style.minHeight='58px';
-        }
-      }
-    });
-    await new Promise(r=>{
-      const imgs=[...clone.querySelectorAll('img')].filter(img=>!img.complete||!img.naturalWidth);
-      if(!imgs.length){r();return;}
-      let cnt=imgs.length;const done=()=>{if(--cnt<=0)r();};
-      imgs.forEach(img=>{img.addEventListener('load',done,{once:true});img.addEventListener('error',done,{once:true});});
-      setTimeout(r,4000);
-    });
-    if(document.fonts?.ready)try{await document.fonts.ready;}catch(_){}
-    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
-    await new Promise(r=>setTimeout(r,250));
-    const canvas=await html2canvas(clone,{
-      scale:1.8,useCORS:true,backgroundColor:'#fff',
-      scrollX:0,scrollY:0,logging:false,allowTaint:true,
-      width:1320,windowWidth:1320
-    });
-    stage.remove();
-    const{jsPDF}=window.jspdf;
+    const liveRows=[...document.querySelectorAll('#tbodyRows .row')];
+    const totalPages=Math.max(1,Math.ceil(liveRows.length/rowsPerPage));
+    const {jsPDF}=window.jspdf;
     const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});
-    const pw=pdf.internal.pageSize.getWidth(),ph2=pdf.internal.pageSize.getHeight();
-    const ratio=canvas.width/canvas.height;
-    let w=pw,h=w/ratio;if(h>ph2){h=ph2;w=h*ratio;}
-    pdf.addImage(canvas.toDataURL('image/jpeg',.93),'JPEG',(pw-w)/2,(ph2-h)/2,w,h,'','FAST');
-    const blob=pdf.output('blob');
-    const file=new File([blob],fn,{type:'application/pdf'});
-    if(navigator.share&&navigator.canShare?.({files:[file]})){
-      await navigator.share({title:'QA/QC Inspection',files:[file]});
-      setStatus('✅ Share PDF แล้ว');return;
+    for(let pageIndex=0;pageIndex<totalPages;pageIndex++){
+      const stage=document.createElement('div');stage.className='spdf-stage';
+      const clone=src.cloneNode(true);stage.appendChild(clone);document.body.appendChild(stage);
+      try{
+        clone.querySelectorAll('.screen-hdr').forEach(el=>el.classList.remove('hdr-hidden'));
+        clone.querySelectorAll('.screen-ftr').forEach(el=>{el.classList.remove('ftr-hidden');el.style.display='';});
+        clone.querySelectorAll('.inspection-head-scroll,.inspection-body-scroll').forEach(el=>{el.style.overflow='visible';el.style.maxHeight='none';});
+        clone.querySelectorAll('.inspection-head-scroll').forEach(el=>{el.style.setProperty('--sbw','0px');el.style.paddingRight='0';});
+        clone.querySelectorAll('.toolbar,.thumb-edit-btn,.thumb-del-btn,.btn-upload,.media-toolbar,.fullscreen-fab').forEach(el=>el.remove());
+        const pageStart=pageIndex*rowsPerPage,pageEnd=pageStart+rowsPerPage;
+        [...clone.querySelectorAll('#tbodyRows .row')].forEach((row,idx)=>{if(idx<pageStart||idx>=pageEnd)row.remove();});
+        clone.querySelectorAll('[data-footer="page"]').forEach(el=>{el.textContent=(pageIndex+1)+'/'+totalPages;});
+        syncRemarkExportLayout(clone);
+        clone.querySelectorAll('.thumb').forEach(ct=>{
+          const idx=Number(ct.getAttribute('data-export-idx')||'-1');
+          const url=idx>=0?(flatUrls[idx]||''):'';
+          const live=idx>=0?liveThumbs[idx]:null;
+          ct.innerHTML='';ct.removeAttribute('data-export-idx');
+          if(url){const img=document.createElement('img');img.src=url;img.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block;';ct.appendChild(img);}
+          ct.style.minHeight='0';ct.style.aspectRatio='auto';
+          const grid=ct.closest('.image-grid');
+          if(grid&&grid.classList.contains('single-thumb')){ct.style.width='100%';ct.style.minWidth='0';ct.style.flex='none';ct.style.height='100%';}
+          else if(ct.classList.contains('remark-img')){ct.style.width='100%';ct.style.minWidth='0';ct.style.flex='none';ct.style.height='58px';ct.style.minHeight='58px';}
+          applyPdfRemarkImageRule(ct,live);
+        });
+        await new Promise(r=>{const imgs=[...clone.querySelectorAll('img')].filter(img=>!img.complete||!img.naturalWidth);if(!imgs.length){r();return;}let cnt=imgs.length;const done=()=>{if(--cnt<=0)r();};imgs.forEach(img=>{img.addEventListener('load',done,{once:true});img.addEventListener('error',done,{once:true});});setTimeout(r,4000);});
+        if(document.fonts?.ready)try{await document.fonts.ready;}catch(_){}
+        await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));await new Promise(r=>setTimeout(r,180));
+        const canvas=await html2canvas(clone,{scale:1.8,useCORS:true,backgroundColor:'#fff',scrollX:0,scrollY:0,logging:false,allowTaint:true,width:1320,windowWidth:1320});
+        const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();const ratio=canvas.width/canvas.height;let w=pw,h=w/ratio;if(h>ph){h=ph;w=h*ratio;}if(pageIndex>0)pdf.addPage('a4','landscape');
+        pdf.addImage(canvas.toDataURL('image/jpeg',.93),'JPEG',(pw-w)/2,(ph-h)/2,w,h,'','FAST');
+      }finally{try{stage.remove();}catch(_e){}}
     }
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download=fn;
-    document.body.appendChild(a);a.click();a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),3000);
-    setStatus('📥 ดาวน์โหลด PDF แล้ว');
-  }catch(e){
-    if(e?.name==='AbortError'){setStatus('ยกเลิก');return;}
-    console.error(e);setStatus('⚠️ PDF ไม่สำเร็จ — ใช้ Print แทน',false);
-    setTimeout(doPdfPrint,400);
-  }
+    const blob=pdf.output('blob');const file=new File([blob],fn,{type:'application/pdf'});
+    if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({title:'QA/QC Inspection',files:[file]});setStatus('✅ Share PDF แล้ว');}
+    else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);setStatus('✅ อุปกรณ์นี้ Share file ไม่ได้ จึงดาวน์โหลด PDF แทน');}
+  }catch(e){console.error(e);setStatus('⚠️ Share PDF ไม่สำเร็จ',false);}
+  finally{liveThumbs.forEach(t=>t.removeAttribute('data-export-idx'));}
 }
 document.getElementById('btnSharePdf').onclick=doSharePdf;
 const DB_NAME = 'qaqc_db';
@@ -1541,22 +1589,48 @@ function zipStore(fileMap){
 
 function buildXlsxFileMap(payload){
   const colPts=[15,28.5,32.25,16.5,27,16.5,3.75,36,36,21.75,17.25,7.5,19.5,3.75,3.75,53.25,53.25,53.25,53.25,53.25,53.25,53.25,53.25,53.25,56.25,37.5,37.5,13.5,37.5,37.5,63];
-  const rowHeights=[10.5,16.5,16.5,16.5,16.5,16.5,7.5,15,8.25,12,16.5];
   const dataRows=Array.isArray(payload.rows)&&payload.rows.length?payload.rows:[{}];
-  dataRows.forEach(()=>rowHeights.push(153.75));
-  rowHeights.push(21.75,15,15,10.5);
+
+  // ✅ Excel pagination: 1 หน้า A4 แนวนอน = header + 3 data rows + footer เหมือน Export PDF
+  const ROWS_PER_EXCEL_PAGE=3;
+  const HEADER_ROW_HEIGHTS=[10.5,16.5,16.5,16.5,16.5,16.5,7.5,15,8.25,12,16.5];
+  const DATA_ROW_HEIGHT=126.75;
+  const FOOTER_ROW_HEIGHTS=[21.75,15,15,10.5];
+  const pages=[];
+  for(let i=0;i<dataRows.length;i+=ROWS_PER_EXCEL_PAGE){pages.push(dataRows.slice(i,i+ROWS_PER_EXCEL_PAGE));}
+  if(!pages.length)pages.push([{}]);
+
+  const rowHeights=[],pageInfos=[];
+  pages.forEach((pageRows,pageIdx)=>{
+    const startRow=rowHeights.length+1;
+    HEADER_ROW_HEIGHTS.forEach(h=>rowHeights.push(h));
+    for(let i=0;i<ROWS_PER_EXCEL_PAGE;i++)rowHeights.push(DATA_ROW_HEIGHT);
+    FOOTER_ROW_HEIGHTS.forEach(h=>rowHeights.push(h));
+    const firstDataRow=startRow+HEADER_ROW_HEIGHTS.length;
+    const spacerRow=firstDataRow+ROWS_PER_EXCEL_PAGE;
+    const footerRow1=spacerRow+1,footerRow2=spacerRow+2,finalBlankRow=spacerRow+3;
+    pageInfos.push({pageIdx,startRow,firstDataRow,spacerRow,footerRow1,footerRow2,finalBlankRow,rows:pageRows});
+  });
   const totalRows=rowHeights.length;
   const colsXml=colPts.map((pt,i)=>'<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+ptToXlsxWidth(pt).toFixed(3)+'" customWidth="1"/>').join('');
-  const merges=['A2:H6','I2:X6','Y2:AA2','AC2:AE2','Y3:AA3','AC3:AE3','Y4:AA4','AC4:AE4','Y5:AA5','AC5:AE5','Y6:AA6','AC6:AE6','A7:AE7','A8:AE8','A9:AE9','A10:W10','X10:Y10','Z10:AE11','C11:G11','H11:O11','P11:S11','T11:W11'];
-  const firstDataRow=12;
-  dataRows.forEach((_,idx)=>{const r=firstDataRow+idx;merges.push('C'+r+':G'+r,'H'+r+':O'+r,'P'+r+':S'+r,'T'+r+':W'+r,'Z'+r+':AE'+r);});
-  const lastDataRow=firstDataRow+dataRows.length-1;
-  const spacerRow=lastDataRow+1,footerRow1=spacerRow+1,footerRow2=spacerRow+2,finalBlankRow=spacerRow+3;
-  const fourthRowFromBottom=finalBlankRow-3;
+  const merges=[];
+  function R(page,baseRow){return page.startRow+baseRow-1;}
+  function addPageMerge(page){
+    merges.push('A'+R(page,2)+':H'+R(page,6),'I'+R(page,2)+':X'+R(page,6));
+    [2,3,4,5,6].forEach(r=>{merges.push('Y'+R(page,r)+':AA'+R(page,r),'AC'+R(page,r)+':AE'+R(page,r));});
+    merges.push('A'+R(page,7)+':AE'+R(page,7),'A'+R(page,8)+':AE'+R(page,8),'A'+R(page,9)+':AE'+R(page,9));
+    merges.push('A'+R(page,10)+':W'+R(page,10),'X'+R(page,10)+':Y'+R(page,10),'Z'+R(page,10)+':AE'+R(page,11));
+    merges.push('C'+R(page,11)+':G'+R(page,11),'H'+R(page,11)+':O'+R(page,11),'P'+R(page,11)+':S'+R(page,11),'T'+R(page,11)+':W'+R(page,11));
+    for(let i=0;i<ROWS_PER_EXCEL_PAGE;i++){
+      const r=page.firstDataRow+i;
+      merges.push('C'+r+':G'+r,'H'+r+':O'+r,'P'+r+':S'+r,'T'+r+':W'+r,'Z'+r+':AE'+r);
+    }
+    merges.push('B'+page.footerRow1+':E'+page.footerRow1,'F'+page.footerRow1+':T'+page.footerRow1,'U'+page.footerRow1+':AC'+page.footerRow1,'AD'+page.footerRow1+':AE'+page.footerRow1);
+    merges.push('B'+page.footerRow2+':E'+page.footerRow2,'F'+page.footerRow2+':T'+page.footerRow2,'U'+page.footerRow2+':AC'+page.footerRow2,'AD'+page.footerRow2+':AE'+page.footerRow2);
+    merges.push('A'+page.finalBlankRow+':AE'+page.finalBlankRow);
+  }
+  pageInfos.forEach(addPageMerge);
   const noSideBordersStyleId=55;
-  merges.push('B'+footerRow1+':E'+footerRow1,'F'+footerRow1+':T'+footerRow1,'U'+footerRow1+':AC'+footerRow1,'AD'+footerRow1+':AE'+footerRow1);
-  merges.push('B'+footerRow2+':E'+footerRow2,'F'+footerRow2+':T'+footerRow2,'U'+footerRow2+':AC'+footerRow2,'AD'+footerRow2+':AE'+footerRow2);
-  merges.push('A'+finalBlankRow+':AE'+finalBlankRow);
 
   const style={border:0,header:1,left:2,center:3,underline:4,title:5,spacerNoLR:6};
   const EDGE_VARIANTS={n:0,t:1,b:2,l:3,r:4,tl:5,tr:6,bl:7,br:8};
@@ -1564,27 +1638,41 @@ function buildXlsxFileMap(payload){
   function ensureRow(r){if(!rowMap.has(r))rowMap.set(r,new Map());return rowMap.get(r);}
   function setCell(r,c,value,s,t){if(value===undefined||value===null||value==='')return;ensureRow(r).set(c,{c,value:String(value),s,t:t||'inlineStr'});}
   function setBlankCell(r,c,s){const row=ensureRow(r);if(!row.has(c))row.set(c,{c,value:'',s,t:'inlineStr'});}
+  function getPageInfoByRow(r){return pageInfos.find(p=>r>=p.startRow&&r<=p.finalBlankRow)||null;}
   function getVariantKey(r,c){
-    const top=r===2,bottom=r===finalBlankRow,left=c===1,right=c===31;
+    const page=getPageInfoByRow(r);
+    const top=page&&r===R(page,2),bottom=page&&r===page.finalBlankRow,left=c===1,right=c===31;
     if(top&&left)return'tl';if(top&&right)return'tr';
     if(bottom&&left)return'bl';if(bottom&&right)return'br';
     if(top)return't';if(bottom)return'b';if(left)return'l';if(right)return'r';
     return'n';
   }
   function resolveStyleId(baseStyle,r,c){
-    if(r===fourthRowFromBottom && c>=2 && c<=30)return noSideBordersStyleId;
+    const page=getPageInfoByRow(r);
+    if(page&&r===page.spacerRow&&c>=2&&c<=30)return noSideBordersStyleId;
     return 1+(baseStyle*9)+EDGE_VARIANTS[getVariantKey(r,c)];
   }
-  for(let r=2;r<=finalBlankRow;r++){for(let c=1;c<=31;c++)setBlankCell(r,c,style.border);}
-  setCell(2,9,'Energy Maintenance\nBoiler Service\n\nSiam Kraft Industry Co.,Ltd.',style.title);
-  setCell(2,25,'REPORT CODE',style.left);setCell(2,28,':',style.center);setCell(2,29,payload.meta?.reportCode||'',style.left);
-  setCell(3,25,'REVISION',style.left);setCell(3,28,':',style.center);setCell(3,29,payload.meta?.revision||'',style.left);
-  setCell(4,25,'PLANT',style.left);setCell(4,28,':',style.center);setCell(4,29,payload.meta?.plant||'',style.left);
-  setCell(5,25,'MACHINE',style.left);setCell(5,28,':',style.center);setCell(5,29,payload.meta?.machine||'',style.left);
-  setCell(6,25,'JOB SCOPE',style.left);setCell(6,28,':',style.center);setCell(6,29,payload.meta?.jobScope||'Boiler inspection service',style.left);
-  setCell(8,1,'Appendix : QA/QC Inspection Checksheet',style.underline);
-  setCell(10,24,'Status',style.header);setCell(10,26,'Remark',style.header);
-  setCell(11,2,'No.',style.header);setCell(11,3,'Name',style.header);setCell(11,8,'Problem',style.header);setCell(11,16,'Picture Before',style.header);setCell(11,20,'Picture After',style.header);setCell(11,24,'Pass',style.header);setCell(11,25,'Reject',style.header);
+  function fillPageHeader(page){
+    for(let r=R(page,2);r<=page.finalBlankRow;r++){for(let c=1;c<=31;c++)setBlankCell(r,c,style.border);}
+    setCell(R(page,2),9,'Energy Maintenance\nBoiler Service\n\nSiam Kraft Industry Co.,Ltd.',style.title);
+    setCell(R(page,2),25,'REPORT CODE',style.left);setCell(R(page,2),28,':',style.center);setCell(R(page,2),29,payload.meta?.reportCode||'',style.left);
+    setCell(R(page,3),25,'REVISION',style.left);setCell(R(page,3),28,':',style.center);setCell(R(page,3),29,payload.meta?.revision||'',style.left);
+    setCell(R(page,4),25,'PLANT',style.left);setCell(R(page,4),28,':',style.center);setCell(R(page,4),29,payload.meta?.plant||'',style.left);
+    setCell(R(page,5),25,'MACHINE',style.left);setCell(R(page,5),28,':',style.center);setCell(R(page,5),29,payload.meta?.machine||'',style.left);
+    setCell(R(page,6),25,'JOB SCOPE',style.left);setCell(R(page,6),28,':',style.center);setCell(R(page,6),29,payload.meta?.jobScope||'Boiler inspection service',style.left);
+    setCell(R(page,8),1,'Appendix : QA/QC Inspection Checksheet',style.underline);
+    setCell(R(page,10),24,'Status',style.header);setCell(R(page,10),26,'Remark',style.header);
+    setCell(R(page,11),2,'No.',style.header);setCell(R(page,11),3,'Name',style.header);setCell(R(page,11),8,'Problem',style.header);setCell(R(page,11),16,'Picture Before',style.header);setCell(R(page,11),20,'Picture After',style.header);setCell(R(page,11),24,'Pass',style.header);setCell(R(page,11),25,'Reject',style.header);
+    setCell(page.footerRow1,2,'Date',style.header);
+    setCell(page.footerRow1,6,'Prepare By',style.header);
+    setCell(page.footerRow1,21,'Approved by',style.header);
+    setCell(page.footerRow1,30,'Page',style.header);
+    setCell(page.footerRow2,2,payload.footer?.date||'',style.center);
+    setCell(page.footerRow2,6,payload.footer?.prepareBy||'',style.center);
+    setCell(page.footerRow2,21,payload.footer?.approvedBy||'',style.center);
+    setCell(page.footerRow2,30,String(page.pageIdx+1),style.center);
+  }
+  pageInfos.forEach(fillPageHeader);
 
   const mediaFiles={},drawingRels=[],anchors=[];let imageCounter=0;
     // 1. เพิ่มฟังก์ชันช่วยแปลงสัดส่วน (0.0 - 1.0) ให้เป็นตำแหน่งพิกัดอ้างอิงจากความกว้าง/ความสูงจริง
@@ -1650,102 +1738,100 @@ function buildXlsxFileMap(payload){
   }
 
   // 3. อัปเดต placeImagesDynamic
+  // ✅ Picture Before / Picture After: รูปเดียวใช้เงื่อนไขตามแนวรูป
+  //    - แนวตั้ง: ขยายบน-ล่างตามสัดส่วน จัดกลาง ไม่ขยายซ้าย-ขวา
+  //    - แนวนอน/สี่เหลี่ยม: ขยายเต็ม cell
   function placeImagesDynamic(images,startCol,endCol,startRow,endRow){
     const imgs=Array.isArray(images)?images.filter(Boolean).slice(0,4):[];
     if(!imgs.length)return;
-    const boxes=[];
-    if(imgs.length===1){
-      boxes.push({x1:0,y1:0,x2:1,y2:1});
-    }else if(imgs.length===2){
-      boxes.push({x1:0,y1:0,x2:0.5,y2:1});
-      boxes.push({x1:0.5,y1:0,x2:1,y2:1});
-    }else if(imgs.length===3){
-      const w=1/3;
-      boxes.push({x1:0,y1:0,x2:w,y2:1});
-      boxes.push({x1:w,y1:0,x2:w*2,y2:1});
-      boxes.push({x1:w*2,y1:0,x2:1,y2:1});
-    }else{
-      boxes.push({x1:0,y1:0,x2:0.5,y2:0.5});
-      boxes.push({x1:0.5,y1:0,x2:1,y2:0.5});
-      boxes.push({x1:0,y1:0.5,x2:0.5,y2:1});
-      boxes.push({x1:0.5,y1:0.5,x2:1,y2:1});
-    }
-    imgs.forEach((item,i)=>{
-      const b=boxes[i];
-      // แปลงสัดส่วน 0-1 เป็นพิกัดจริง
+    function spanEmu(start,end,emuFn){let total=0,pos=start;while(pos<end){const step=Math.min(Math.floor(pos)+1,end);total+=(step-pos)*emuFn(Math.floor(pos));pos=step;}return Math.max(1,total);}
+    function imageNaturalSize(item){const w=item&&typeof item==='object'?Number(item.w||0):0;const h=item&&typeof item==='object'?Number(item.h||0):0;return {w:Math.max(1,w||120),h:Math.max(1,h||90)};}
+    function addItemAtBox(item,b){
       const x1=calcAbsCoord(startCol, endCol, b.x1, getColEmu);
       const y1=calcAbsCoord(startRow, endRow, b.y1, getRowEmu);
       const x2=calcAbsCoord(startCol, endCol, b.x2, getColEmu);
       const y2=calcAbsCoord(startRow, endRow, b.y2, getRowEmu);
-      
       const baseSrc=item&&typeof item==='object'?(item.base||''):item;
       const overlaySrc=item&&typeof item==='object'?(item.overlay||''):'';
       if(baseSrc) addImageAnchor(baseSrc,x1,y1,x2,y2);
       if(overlaySrc) addImageAnchor(overlaySrc,x1,y1,x2,y2);
-    });
+    }
+    if(imgs.length===1){
+      const item=imgs[0],sz=imageNaturalSize(item);
+      if(sz.h>sz.w){
+        const areaW=spanEmu(startCol,endCol,getColEmu),areaH=spanEmu(startRow,endRow,getRowEmu);
+        const fx=Math.min(1,(areaH*(sz.w/sz.h))/areaW),xPad=(1-fx)/2;
+        addItemAtBox(item,{x1:xPad,y1:0,x2:xPad+fx,y2:1});
+      }else addItemAtBox(item,{x1:0,y1:0,x2:1,y2:1});
+      return;
+    }
+    const boxes=[];
+    if(imgs.length===2){boxes.push({x1:0,y1:0,x2:0.5,y2:1},{x1:0.5,y1:0,x2:1,y2:1});}
+    else if(imgs.length===3){const w=1/3;boxes.push({x1:0,y1:0,x2:w,y2:1},{x1:w,y1:0,x2:w*2,y2:1},{x1:w*2,y1:0,x2:1,y2:1});}
+    else{boxes.push({x1:0,y1:0,x2:0.5,y2:0.5},{x1:0.5,y1:0,x2:1,y2:0.5},{x1:0,y1:0.5,x2:0.5,y2:1},{x1:0.5,y1:0.5,x2:1,y2:1});}
+    imgs.forEach((item,i)=>addItemAtBox(item,boxes[i]));
   }
 
   // 4. อัปเดต placeRemarkImages
+  // ✅ เฉพาะ Export Excel: Remark มีรูปเดียว
+  //    - รูปแนวตั้ง: ขยายเต็มด้านบน-ล่างตามสัดส่วน ไม่ขยายเต็มซ้าย-ขวา และจัดกลาง cell
+  //    - รูปแนวนอน/สี่เหลี่ยม: ขยายเต็ม cell
   function placeRemarkImages(images,startCol,endCol,startRow,endRow){
     const imgs=Array.isArray(images)?images.filter(Boolean).slice(0,4):[];
     if(!imgs.length)return;
-    const boxes=[];
-    if(imgs.length===1){
-      boxes.push({x1:0,y1:0,x2:1,y2:1});
-    }else if(imgs.length===2){
-      boxes.push({x1:0,y1:0,x2:0.5,y2:1});
-      boxes.push({x1:0.5,y1:0,x2:1,y2:1});
-    }else if(imgs.length===3){
-      boxes.push({x1:0,y1:0,x2:1,y2:0.48});
-      boxes.push({x1:0,y1:0.48,x2:0.5,y2:1});
-      boxes.push({x1:0.5,y1:0.48,x2:1,y2:1});
-    }else{
-      boxes.push({x1:0,y1:0,x2:0.5,y2:0.5});
-      boxes.push({x1:0.5,y1:0,x2:1,y2:0.5});
-      boxes.push({x1:0,y1:0.5,x2:0.5,y2:1});
-      boxes.push({x1:0.5,y1:0.5,x2:1,y2:1});
-    }
-    imgs.forEach((item,i)=>{
-      const b=boxes[i];
-      // แปลงสัดส่วน 0-1 เป็นพิกัดจริง
+    function spanEmu(start,end,emuFn){let total=0,pos=start;while(pos<end){const step=Math.min(Math.floor(pos)+1,end);total+=(step-pos)*emuFn(Math.floor(pos));pos=step;}return Math.max(1,total);}
+    function imageNaturalSize(item){const w=item&&typeof item==='object'?Number(item.w||0):0;const h=item&&typeof item==='object'?Number(item.h||0):0;return {w:Math.max(1,w||120),h:Math.max(1,h||90)};}
+    function addItemAtBox(item,b){
       const x1=calcAbsCoord(startCol, endCol, b.x1, getColEmu);
       const y1=calcAbsCoord(startRow, endRow, b.y1, getRowEmu);
       const x2=calcAbsCoord(startCol, endCol, b.x2, getColEmu);
       const y2=calcAbsCoord(startRow, endRow, b.y2, getRowEmu);
-      
       const baseSrc=item&&typeof item==='object'?(item.base||''):item;
       const overlaySrc=item&&typeof item==='object'?(item.overlay||''):'';
       if(baseSrc) addImageAnchor(baseSrc,x1,y1,x2,y2);
       if(overlaySrc) addImageAnchor(overlaySrc,x1,y1,x2,y2);
-    });
+    }
+    if(imgs.length===1){
+      const item=imgs[0],sz=imageNaturalSize(item);
+      if(sz.h>sz.w){
+        const areaW=spanEmu(startCol,endCol,getColEmu),areaH=spanEmu(startRow,endRow,getRowEmu);
+        const fx=Math.min(1,(areaH*(sz.w/sz.h))/areaW),xPad=(1-fx)/2;
+        addItemAtBox(item,{x1:xPad,y1:0,x2:xPad+fx,y2:1});
+      }else addItemAtBox(item,{x1:0,y1:0,x2:1,y2:1});
+      return;
+    }
+    const boxes=[];
+    if(imgs.length===2){boxes.push({x1:0,y1:0,x2:0.5,y2:1},{x1:0.5,y1:0,x2:1,y2:1});}
+    else if(imgs.length===3){boxes.push({x1:0,y1:0,x2:1,y2:0.48},{x1:0,y1:0.48,x2:0.5,y2:1},{x1:0.5,y1:0.48,x2:1,y2:1});}
+    else{boxes.push({x1:0,y1:0,x2:0.5,y2:0.5},{x1:0.5,y1:0,x2:1,y2:0.5},{x1:0,y1:0.5,x2:0.5,y2:1},{x1:0.5,y1:0.5,x2:1,y2:1});}
+    imgs.forEach((item,i)=>addItemAtBox(item,boxes[i]));
   }
 
   const logoSrc=((document.querySelector('.logo-cell img')||{}).src||'').trim();
-  if(logoSrc)placeImagesDynamic([logoSrc],1,9,2,7);
+  if(logoSrc)pageInfos.forEach(page=>placeImagesDynamic([logoSrc],1,9,R(page,2),R(page,7)));
 
-  dataRows.forEach((r,idx)=>{
-    const rowNum=firstDataRow+idx;
-    setCell(rowNum,2,r.no||String(idx+1),style.center);
-    setCell(rowNum,3,htmlToPlainText(r.name||''),style.left);
-    setCell(rowNum,8,htmlToPlainText(r.problem||''),style.left);
-    setCell(rowNum,24,r.pass?'✓':'',style.center);
-    setCell(rowNum,25,r.reject?'✓':'',style.center);
-    const remarkTextPlain=htmlToPlainText(r.remarkText||'').trim();
-    setCell(rowNum,26,htmlToPlainText(r.remarkText||'-'),style.left);
-    /* ✅ FIX: ใช้ remarkImages จาก payload ที่ส่งมาถูกต้อง */
-    const before=Array.isArray(r.before)?r.before.slice(0,4):[];
-    const after=Array.isArray(r.after)?r.after.slice(0,4):[];
-    const remImgs=Array.isArray(r.remarkImages)?r.remarkImages.slice(0,4):[];
-    placeImagesDynamic(before,16,20,rowNum,rowNum+1);
-    placeImagesDynamic(after,20,24,rowNum,rowNum+1);
-    placeRemarkImages(remImgs,26,32,remarkTextPlain ? (rowNum+0.33) : rowNum,rowNum+1);
+  let globalRowIdx=0;
+  pageInfos.forEach(page=>{
+    for(let slot=0;slot<ROWS_PER_EXCEL_PAGE;slot++){
+      const r=page.rows[slot];
+      const rowNum=page.firstDataRow+slot;
+      if(!r)continue;
+      setCell(rowNum,2,r.no||String(globalRowIdx+1),style.center);
+      setCell(rowNum,3,htmlToPlainText(r.name||''),style.left);
+      setCell(rowNum,8,htmlToPlainText(r.problem||''),style.left);
+      setCell(rowNum,24,r.pass?'✓':'',style.center);
+      setCell(rowNum,25,r.reject?'✓':'',style.center);
+      const remarkTextPlain=htmlToPlainText(r.remarkText||'').trim();
+      setCell(rowNum,26,htmlToPlainText(r.remarkText||'-'),style.left);
+      const before=Array.isArray(r.before)?r.before.slice(0,4):[];
+      const after=Array.isArray(r.after)?r.after.slice(0,4):[];
+      const remImgs=Array.isArray(r.remarkImages)?r.remarkImages.slice(0,4):[];
+      placeImagesDynamic(before,16,20,rowNum,rowNum+1);
+      placeImagesDynamic(after,20,24,rowNum,rowNum+1);
+      placeRemarkImages(remImgs,26,32,remarkTextPlain ? (rowNum+0.33) : rowNum,rowNum+1);
+      globalRowIdx++;
+    }
   });
-
-  setCell(footerRow1,2,payload.footer?.date||'Date',style.header);
-  setCell(footerRow1,6,payload.footer?.prepareBy||'Prepare By',style.header);
-  setCell(footerRow1,21,payload.footer?.approvedBy||'Approved by',style.header);
-  setCell(footerRow1,30,payload.footer?.page||'Page',style.header);
-  setCell(footerRow2,30,'1',style.center);
 
   let sheetRows='';
   for(let r=1;r<=totalRows;r++){
@@ -1759,12 +1845,13 @@ function buildXlsxFileMap(payload){
 
   const mergeXml='<mergeCells count="'+merges.length+'">'+merges.map(m=>'<mergeCell ref="'+m+'"/>').join('')+'</mergeCells>';
   const drawingXmlRef=anchors.length?'<drawing r:id="rId1"/>':'';
+  const pageBreaks=pageInfos.length>1?'<rowBreaks count="'+(pageInfos.length-1)+'" manualBreakCount="'+(pageInfos.length-1)+'">'+pageInfos.slice(0,-1).map(p=>'<brk id="'+p.finalBlankRow+'" max="16383" man="1"/>').join('')+'</rowBreaks>':'';
   const sheetXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
     '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'+
-    '<dimension ref="A1:AE'+totalRows+'"/><sheetViews><sheetView workbookViewId="0" zoomScale="82"/></sheetViews>'+
-    '<sheetFormatPr defaultRowHeight="15"/><cols>'+colsXml+'</cols><sheetData>'+sheetRows+'</sheetData>'+
-    mergeXml+'<pageMargins left="0.3" right="0.3" top="0.3" bottom="0.3" header="0" footer="0"/>'+
-    '<pageSetup orientation="landscape" fitToWidth="1" fitToHeight="0" paperSize="9"/>'+drawingXmlRef+'</worksheet>';
+    '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:AE'+totalRows+'"/><sheetViews><sheetView workbookViewId="0" zoomScale="82"/></sheetViews>'+ 
+    '<sheetFormatPr defaultRowHeight="15"/><cols>'+colsXml+'</cols><sheetData>'+sheetRows+'</sheetData>'+ 
+    mergeXml+'<pageMargins left="0" right="0" top="0" bottom="0" header="0" footer="0"/>'+ 
+    '<pageSetup orientation="landscape" fitToWidth="1" fitToHeight="0" paperSize="9"/>'+pageBreaks+drawingXmlRef+'</worksheet>';
 
   const borderXml=[
     '<border><left/><right/><top/><bottom/><diagonal/></border>',
@@ -1909,3 +1996,5 @@ excelBtn.onclick=async()=>{
 
 })();
 </script>
+</body>
+</html>
