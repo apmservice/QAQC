@@ -370,6 +370,11 @@ body.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-2 .remark-grid .thumb i
 .remark-wrap.remark-no-text.remark-imgcount-1 .remark-grid .thumb.single-landscape-fit img{
   position:absolute!important;left:0!important;top:0!important;width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;
 }
+
+/* ===== CLIPBOARD PASTE SUPPORT ===== */
+.image-grid.paste-ready,.remark-grid.paste-ready{outline:2px dashed #1f7ae0!important;outline-offset:2px!important;background:rgba(31,122,224,.04)!important}
+.image-grid[tabindex],.remark-grid[tabindex]{cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -503,7 +508,11 @@ body.pdf-exp .remark-wrap.remark-no-text.remark-imgcount-2 .remark-grid .thumb i
   <button class="tool-btn danger" id="btnDelRow">－ ลบแถว</button>
   <button class="tool-btn" id="btnPdf">🖨 PDF</button>
   <button class="tool-btn" id="btnSharePdf">📄 Share PDF</button>
+  <button class="tool-btn" id="pdfImportBtn" type="button">Import PDF</button>
+  <input type="file" id="pdfImportInput" accept=".pdf,application/pdf" style="display:none"/>
   <button class="tool-btn success" id="excelBtn" type="button">Export Excel (.xlsx)</button>
+  <button class="tool-btn" id="excelImportBtn" type="button">Import Excel (.xlsx)</button>
+  <input type="file" id="excelImportInput" accept=".xlsx" style="display:none"/>
   <button class="tool-btn" id="btnExport">📤 Export</button>
   <button class="tool-btn" id="btnImport">📥 Import</button>
   <input type="file" id="importInput" accept=".json" style="display:none"/>
@@ -909,31 +918,82 @@ function getExcelImagesFromGrid(grid){
     };
   }).filter(Boolean);
 }
-/* ══ FILE INPUT ══ */
+/* ══ FILE INPUT / CLIPBOARD PASTE ══ */
+let activePasteGrid=null;
+function setActivePasteGrid(grid){
+  if(!grid)return;
+  const label=grid.classList.contains('field-before')?'Picture Before':grid.classList.contains('field-after')?'Picture After':'Remark';
+  if(activePasteGrid===grid&&grid.classList.contains('paste-ready')){setStatus('พร้อมวางรูปใน '+label+' (Ctrl+V)');return;}
+  document.querySelectorAll('.image-grid.paste-ready,.remark-grid.paste-ready').forEach(g=>g.classList.remove('paste-ready'));
+  activePasteGrid=grid;
+  grid.classList.add('paste-ready');
+  try{grid.focus({preventScroll:true});}catch(_e){try{grid.focus();}catch(__e){}}
+  setStatus('พร้อมวางรูปใน '+label+' (Ctrl+V)');
+}
+async function addImageFilesToGrid(grid,files,sourceLabel='ไฟล์'){
+  if(!grid)return 0;
+  const isRemark=grid.classList.contains('field-remark-images');
+  const imgs=[...files].filter(f=>f&&f.type&&f.type.startsWith('image/'));
+  if(!imgs.length)return 0;
+  const avail=Math.max(0,MAX_IMG-grid.querySelectorAll('.thumb').length);
+  if(!avail){alert('เต็มแล้ว (สูงสุด '+MAX_IMG+' รูป)');return 0;}
+  const sel=imgs.slice(0,avail);
+  if(imgs.length>avail)alert('เพิ่มได้อีก '+avail+' รูปเท่านั้น');
+  let added=0;
+  for(const f of sel){
+    const ph=document.createElement('div');
+    ph.className='thumb';
+    ph.style.cssText='display:flex;align-items:center;justify-content:center;font-size:11px;opacity:.5;height:90px';
+    ph.textContent='กำลังย่อ…';grid.appendChild(ph);
+    try{
+      const url=await compressImg(f,1800);
+      if(url){const t=makeThumb(url,isRemark,[]);ph.replaceWith(t);syncSingleThumbLayout(grid);added++;}
+      else{ph.remove();syncSingleThumbLayout(grid);}
+    }catch(e){console.error(e);ph.remove();syncSingleThumbLayout(grid);}
+  }
+  syncSingleThumbLayout(grid);
+  if(added){schedSave();setStatus('✅ วางรูปจาก '+sourceLabel+' แล้ว '+added+' รูป');}
+  return added;
+}
 function bindInput(inp){
   inp.onchange=async()=>{
     const grid=document.getElementById(inp.dataset.tgt);if(!grid)return;
-    const isRemark=grid.classList.contains('field-remark-images');
-    const files=[...inp.files].filter(f=>f.type.startsWith('image/'));
-    const avail=Math.max(0,MAX_IMG-grid.querySelectorAll('.thumb').length);
-    if(!avail){alert('เต็มแล้ว (สูงสุด '+MAX_IMG+' รูป)');inp.value='';return;}
-    const sel=files.slice(0,avail);
-    if(files.length>avail)alert('เพิ่มได้อีก '+avail+' รูปเท่านั้น');
-    for(const f of sel){
-      const ph=document.createElement('div');
-      ph.className='thumb';
-      ph.style.cssText='display:flex;align-items:center;justify-content:center;font-size:11px;opacity:.5;height:90px';
-      ph.textContent='กำลังย่อ…';grid.appendChild(ph);
-      try{
-        const url=await compressImg(f,1800);
-        if(url){const t=makeThumb(url,isRemark,[]);ph.replaceWith(t);syncSingleThumbLayout(grid);}
-        else{ph.remove();syncSingleThumbLayout(grid);}
-      }catch(e){console.error(e);ph.remove();}
-    }
-    syncSingleThumbLayout(grid);
-    inp.value='';schedSave();
+    await addImageFilesToGrid(grid,[...inp.files],'ไฟล์');
+    inp.value='';
   };
 }
+function getPasteTargetGrid(e){
+  const ae=document.activeElement;
+  let grid=e.target&&e.target.closest?e.target.closest('.field-before,.field-after,.field-remark-images'):null;
+  if(grid)return grid;
+  if(ae&&ae.closest){
+    grid=ae.closest('.field-before,.field-after,.field-remark-images');
+    if(grid)return grid;
+    const row=ae.closest('tr.row');
+    if(row&&ae.closest('.field-remark-text'))return row.querySelector('.field-remark-images');
+  }
+  return activePasteGrid;
+}
+document.addEventListener('paste',async e=>{
+  const cd=e.clipboardData||window.clipboardData;
+  if(!cd)return;
+  const files=[];
+  if(cd.items){
+    [...cd.items].forEach((it,idx)=>{
+      if(it.kind==='file'&&it.type&&it.type.startsWith('image/')){
+        const blob=it.getAsFile();
+        if(blob){try{files.push(new File([blob],'clipboard_'+Date.now()+'_'+idx+'.png',{type:blob.type||'image/png'}));}catch(_e){files.push(blob);}}
+      }
+    });
+  }
+  if(!files.length&&cd.files)files.push(...[...cd.files].filter(f=>f.type&&f.type.startsWith('image/')));
+  if(!files.length)return;
+  const grid=getPasteTargetGrid(e);
+  if(!grid){setStatus('⚠️ คลิกช่อง Picture Before / Picture After / Remark ก่อนวางรูป',false);return;}
+  e.preventDefault();
+  setActivePasteGrid(grid);
+  await addImageFilesToGrid(grid,files,'คลิปบอร์ด');
+});
 /* ══ ROW ══ */
 function bindRow(row){
   row.querySelectorAll('[contenteditable]').forEach(el=>{el.oninput=schedSave;el.onblur=schedSave;});
@@ -944,6 +1004,21 @@ function bindRow(row){
     };
   });
   row.querySelectorAll('input[type=file][data-tgt]').forEach(bindInput);
+  row.querySelectorAll('.field-before,.field-after,.field-remark-images').forEach(grid=>{
+    grid.tabIndex=0;
+    grid.title='คลิกช่องนี้แล้วกด Ctrl+V เพื่อวางรูปจากคลิปบอร์ด';
+    grid.addEventListener('click',()=>setActivePasteGrid(grid));
+    grid.addEventListener('focus',()=>setActivePasteGrid(grid));
+  });
+  row.querySelectorAll('.media-cell,.remark-cell').forEach(cell=>{
+    cell.addEventListener('click',e=>{
+      if(e.target&&e.target.closest&&e.target.closest('input,label,button'))return;
+      const grid=cell.querySelector('.field-before,.field-after,.field-remark-images');
+      if(grid)setActivePasteGrid(grid);
+    });
+  });
+  const rt=row.querySelector('.field-remark-text');
+  if(rt)rt.addEventListener('focus',()=>{const g=row.querySelector('.field-remark-images');if(g)activePasteGrid=g;});
 }
 function extractRow(row){
   return{
@@ -1137,6 +1212,15 @@ function isPortraitThumb(thumb){
   const h=(img&&img.naturalHeight)||0;
   return h>w;
 }
+function getDataUrlImageInfo(url){
+  return new Promise(res=>{
+    if(!url){res({w:0,h:0,portrait:false});return;}
+    const img=new Image();
+    img.onload=()=>res({w:img.naturalWidth||0,h:img.naturalHeight||0,portrait:(img.naturalHeight||0)>(img.naturalWidth||0)});
+    img.onerror=()=>res({w:0,h:0,portrait:false});
+    img.src=url;
+  });
+}
 function applyPdfSingleImageFitRule(cloneThumb, liveThumb){
   const grid=cloneThumb&&cloneThumb.closest?cloneThumb.closest('.field-before,.field-after,.field-remark-images,.image-grid,.remark-grid'):null;
   if(!grid)return;
@@ -1172,7 +1256,80 @@ function applyPdfSingleImageFitRule(cloneThumb, liveThumb){
     img.style.removeProperty('transform');
   }
 }
-function applyPdfRemarkImageRule(cloneThumb, liveThumb){applyPdfSingleImageFitRule(cloneThumb,liveThumb);}
+function applyPdfRemarkImageRule(cloneThumb, liveThumb, flatInfo){
+  const remarkGrid=cloneThumb&&cloneThumb.closest?cloneThumb.closest('.field-remark-images,.remark-grid'):null;
+  if(!remarkGrid){applyPdfSingleImageFitRule(cloneThumb,liveThumb);return;}
+  const img=cloneThumb.querySelector('img');
+  if(!img)return;
+  const portrait=!!(flatInfo&&flatInfo.portrait) || isPortraitThumb(liveThumb) || isPortraitThumb(cloneThumb);
+  cloneThumb.style.setProperty('position','relative','important');
+  cloneThumb.style.setProperty('overflow','hidden','important');
+  cloneThumb.style.setProperty('box-sizing','border-box','important');
+  img.style.setProperty('position','absolute','important');
+  img.style.setProperty('display','block','important');
+  if(portrait){
+    img.style.setProperty('left','50%','important');img.style.setProperty('top','50%','important');img.style.setProperty('transform','translate(-50%,-50%)','important');
+    img.style.setProperty('height','100%','important');img.style.setProperty('width','auto','important');img.style.setProperty('max-width','none','important');img.style.setProperty('max-height','100%','important');img.style.setProperty('object-fit','contain','important');
+  }else{
+    img.style.setProperty('left','0','important');img.style.setProperty('top','0','important');img.style.setProperty('transform','none','important');
+    img.style.setProperty('width','100%','important');img.style.setProperty('height','100%','important');img.style.setProperty('max-width','none','important');img.style.setProperty('object-fit','cover','important');
+  }
+}
+function normalizeRemarkImagesForPdf(scope){
+  (scope||document).querySelectorAll('.remark-wrap').forEach(wrap=>{
+    const txt=wrap.querySelector('.field-remark-text,.remark-text');const grid=wrap.querySelector('.field-remark-images,.remark-grid');if(!grid)return;
+    const thumbs=[...grid.querySelectorAll('.thumb')];if(!thumbs.length)return;const hasText=!!getText(txt).trim();
+    wrap.style.setProperty('height','100%','important');wrap.style.setProperty('overflow','hidden','important');
+    if(thumbs.length===1){
+      if(!hasText&&txt)txt.style.setProperty('display','none','important');
+      grid.classList.add('single-thumb');grid.style.setProperty('display','block','important');grid.style.setProperty('grid-template-columns','none','important');grid.style.setProperty('width','100%','important');
+      grid.style.setProperty('height',hasText?'90px':'100%','important');grid.style.setProperty('min-height',hasText?'90px':'0','important');grid.style.setProperty('padding','4px','important');grid.style.setProperty('overflow','hidden','important');
+      const t=thumbs[0];t.style.setProperty('width','100%','important');t.style.setProperty('min-width','0','important');t.style.setProperty('height','100%','important');t.style.setProperty('min-height','0','important');t.style.setProperty('flex','none','important');
+    }else{
+      grid.style.setProperty('display','grid','important');grid.style.setProperty('grid-template-columns','repeat(2,minmax(0,1fr))','important');grid.style.setProperty('gap','4px','important');grid.style.setProperty('width','100%','important');grid.style.setProperty('overflow','hidden','important');
+      thumbs.forEach(t=>{t.style.setProperty('width','100%','important');t.style.setProperty('min-width','0','important');t.style.setProperty('height','58px','important');t.style.setProperty('min-height','58px','important');});
+    }
+  });
+}
+
+/* ===== IMPORT PDF PAYLOAD SUPPORT V11 ===== */
+function pdfUtf8ToB64(str){const bytes=new TextEncoder().encode(str);let bin='';for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode(...bytes.slice(i,i+0x8000));return btoa(bin);}
+function pdfB64ToUtf8(b64){const bin=atob(b64);const bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return new TextDecoder().decode(bytes);}
+function makePdfImportPayload(){
+  const payload=(typeof collectExcelPayload==='function')?collectExcelPayload():collectData();
+  const imgList=arr=>(Array.isArray(arr)?arr:[]).map(x=>({base:(x&&x.base)||'',layers:(x&&x.layers)||[]})).filter(x=>x.base);
+  return {app:'QAQC_IMPORT_PDF_V11',version:11,createdAt:new Date().toISOString(),meta:payload.meta||{},footer:payload.footer||{},rows:(Array.isArray(payload.rows)?payload.rows:[]).map(r=>({no:r.no||'',name:r.name||'',problem:r.problem||'',pass:!!r.pass,reject:!!r.reject,remarkText:r.remarkText||'',before:imgList(r.before),after:imgList(r.after),remark:imgList(r.remarkImages||r.remark)}))};
+}
+function normalizePdfImportPayload(payload){
+  const imgList=arr=>(Array.isArray(arr)?arr:[]).map(x=>({base:(x&&x.base)||'',layers:(x&&x.layers)||[]})).filter(x=>x.base);
+  return {meta:payload.meta||{},footer:payload.footer||{},rows:(Array.isArray(payload.rows)?payload.rows:[]).map(r=>({no:r.no||'',name:r.name||'',problem:r.problem||'',pass:!!r.pass,reject:!!r.reject,remarkText:r.remarkText||'',before:imgList(r.before),after:imgList(r.after),remark:imgList(r.remark||r.remarkImages)}))};
+}
+async function makePdfBlobWithImportData(pdf){
+  const baseBlob=pdf.output('blob');
+  const payload=makePdfImportPayload();
+  const b64=pdfUtf8ToB64(JSON.stringify(payload));
+  const comment='\n%QAQC_IMPORT_PDF_V11_START\n'+b64+'\n%QAQC_IMPORT_PDF_V11_END\n';
+  return new Blob([baseBlob, comment],{type:'application/pdf'});
+}
+function downloadPdfBlob(blob,fn){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);}
+function bytesToBinaryString(u){let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode(...u.slice(i,i+0x8000));return s;}
+async function importPdfFile(file){
+  const u=new Uint8Array(await file.arrayBuffer());
+  const raw=bytesToBinaryString(u);
+  const m=raw.match(/%QAQC_IMPORT_PDF_V11_START\s*([A-Za-z0-9+/=\r\n]+?)\s*%QAQC_IMPORT_PDF_V11_END/);
+  if(!m)throw new Error('PDF นี้ไม่มีข้อมูลสำหรับ Import กรุณาใช้ PDF ที่ Export จากเวอร์ชัน v11 ขึ้นไป');
+  const payload=JSON.parse(pdfB64ToUtf8(m[1].replace(/\s+/g,'')));
+  const data=normalizePdfImportPayload(payload);
+  if(!Array.isArray(data.rows)||!data.rows.length)throw new Error('ไม่พบข้อมูลแถวใน PDF');
+  restoreData(data);saveNow();setStatus('✅ Import PDF สำเร็จ: '+data.rows.length+' แถว');
+}
+function bindPdfImportButton(){
+  const btn=document.getElementById('pdfImportBtn'), inp=document.getElementById('pdfImportInput');
+  if(!btn||!inp)return;
+  btn.onclick=()=>inp.click();
+  inp.onchange=async()=>{const f=inp.files&&inp.files[0];if(!f)return;try{if(!/\.pdf$/i.test(f.name)&&f.type!=='application/pdf')throw new Error('กรุณาเลือกไฟล์ PDF');setStatus('⏳ กำลัง Import PDF…');await importPdfFile(f);}catch(err){console.error(err);alert('Import PDF ไม่สำเร็จ: '+err.message);setStatus('❌ Import PDF ไม่สำเร็จ',false);}finally{inp.value='';}};
+}
+
 /* ══ PDF PRINT ══ */
 async function doPdfPrint(){
   const fn='QAQC_'+new Date().toISOString().slice(0,10)+'.pdf';
@@ -1184,6 +1341,7 @@ async function doPdfPrint(){
     liveThumbs=[...document.querySelectorAll('.thumb')];
     liveThumbs.forEach((t,i)=>t.setAttribute('data-export-idx',String(i)));
     const flatUrls=await Promise.all(liveThumbs.map(t=>flattenThumb(t)));
+    const flatInfos=await Promise.all(flatUrls.map(u=>getDataUrlImageInfo(u)));
     const src=document.querySelector('.sheet');
     const liveRows=[...document.querySelectorAll('#tbodyRows .row')];
     const totalPages=Math.max(1,Math.ceil(liveRows.length/rowsPerPage));
@@ -1238,8 +1396,9 @@ async function doPdfPrint(){
             ct.style.height='58px';
             ct.style.minHeight='58px';
           }
-          applyPdfRemarkImageRule(ct,live);
+          applyPdfRemarkImageRule(ct,live,idx>=0?flatInfos[idx]:null);
         });
+        normalizeRemarkImagesForPdf(clone);
 
         await new Promise(r=>{
           const imgs=[...clone.querySelectorAll('img')].filter(img=>!img.complete||!img.naturalWidth);
@@ -1268,8 +1427,9 @@ async function doPdfPrint(){
       }
     }
 
-    pdf.save(fn);
-    setStatus('✅ บันทึก PDF แนวนอนแล้ว (3 แถว/หน้า)');
+    const blob=await makePdfBlobWithImportData(pdf);
+    downloadPdfBlob(blob,fn);
+    setStatus('✅ บันทึก PDF แนวนอนแล้ว (ฝังข้อมูล Import PDF แล้ว)');
   }catch(e){
     console.error(e);
     setStatus('⚠️ บันทึก PDF ไม่สำเร็จ',false);
@@ -1289,6 +1449,7 @@ async function doSharePdf(){
     liveThumbs=[...document.querySelectorAll('.thumb')];
     liveThumbs.forEach((t,i)=>t.setAttribute('data-export-idx',String(i)));
     const flatUrls=await Promise.all(liveThumbs.map(t=>flattenThumb(t)));
+    const flatInfos=await Promise.all(flatUrls.map(u=>getDataUrlImageInfo(u)));
     const src=document.querySelector('.sheet');
     const liveRows=[...document.querySelectorAll('#tbodyRows .row')];
     const totalPages=Math.max(1,Math.ceil(liveRows.length/rowsPerPage));
@@ -1317,8 +1478,9 @@ async function doSharePdf(){
           const grid=ct.closest('.image-grid');
           if(grid&&grid.classList.contains('single-thumb')){ct.style.width='100%';ct.style.minWidth='0';ct.style.flex='none';ct.style.height='100%';}
           else if(ct.classList.contains('remark-img')){ct.style.width='100%';ct.style.minWidth='0';ct.style.flex='none';ct.style.height='58px';ct.style.minHeight='58px';}
-          applyPdfRemarkImageRule(ct,live);
+          applyPdfRemarkImageRule(ct,live,idx>=0?flatInfos[idx]:null);
         });
+        normalizeRemarkImagesForPdf(clone);
         await new Promise(r=>{const imgs=[...clone.querySelectorAll('img')].filter(img=>!img.complete||!img.naturalWidth);if(!imgs.length){r();return;}let cnt=imgs.length;const done=()=>{if(--cnt<=0)r();};imgs.forEach(img=>{img.addEventListener('load',done,{once:true});img.addEventListener('error',done,{once:true});});setTimeout(r,4000);});
         if(document.fonts?.ready)try{await document.fonts.ready;}catch(_){}
         await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));await new Promise(r=>setTimeout(r,180));
@@ -1327,13 +1489,14 @@ async function doSharePdf(){
         pdf.addImage(canvas.toDataURL('image/jpeg',.93),'JPEG',(pw-w)/2,(ph-h)/2,w,h,'','FAST');
       }finally{try{stage.remove();}catch(_e){}}
     }
-    const blob=pdf.output('blob');const file=new File([blob],fn,{type:'application/pdf'});
+    const blob=await makePdfBlobWithImportData(pdf);const file=new File([blob],fn,{type:'application/pdf'});
     if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({title:'QA/QC Inspection',files:[file]});setStatus('✅ Share PDF แล้ว');}
     else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);setStatus('✅ อุปกรณ์นี้ Share file ไม่ได้ จึงดาวน์โหลด PDF แทน');}
   }catch(e){console.error(e);setStatus('⚠️ Share PDF ไม่สำเร็จ',false);}
   finally{liveThumbs.forEach(t=>t.removeAttribute('data-export-idx'));}
 }
 document.getElementById('btnSharePdf').onclick=doSharePdf;
+bindPdfImportButton();
 const DB_NAME = 'qaqc_db';
 const DB_VERSION = 1;
 const STORE_NAME = 'app_state';
@@ -1961,12 +2124,34 @@ function collectExcelPayload(){
   return payload;
 }
 
+
+/* ===== IMPORT EXCEL ANY QAQC VERSION ===== */
+function excelUtf8ToB64(str){const bytes=new TextEncoder().encode(str);let bin='';for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode(...bytes.slice(i,i+0x8000));return btoa(bin);}
+function excelB64ToUtf8(b64){const bin=atob(b64);const bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return new TextDecoder().decode(bytes);}
+function xmlEsc2(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');}
+function xmlUnesc2(s){return String(s).replace(/&apos;/g,"'").replace(/&quot;/g,'"').replace(/&gt;/g,'>').replace(/&lt;/g,'<').replace(/&amp;/g,'&');}
+function makeExcelImportPayload(payload){const imgList=arr=>(Array.isArray(arr)?arr:[]).map(x=>({base:(x&&x.base)||'',layers:(x&&x.layers)||[]})).filter(x=>x.base);return {app:'QAQC_IMPORT_EXCEL_V9_CLIPBOARD',version:9,createdAt:new Date().toISOString(),meta:payload.meta||{},footer:payload.footer||{},rows:(Array.isArray(payload.rows)?payload.rows:[]).map(r=>({no:r.no||'',name:r.name||'',problem:r.problem||'',pass:!!r.pass,reject:!!r.reject,remarkText:r.remarkText||'',before:imgList(r.before),after:imgList(r.after),remark:imgList(r.remarkImages||r.remark)}))};}
+function addExcelImportPayloadToXlsx(fileMap,payload){const b64=excelUtf8ToB64(JSON.stringify(makeExcelImportPayload(payload)));fileMap['customXml/item1.xml']='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><qaqcImport xmlns="urn:qaqc-import"><payload encoding="base64">'+xmlEsc2(b64)+'</payload></qaqcImport>';fileMap['customXml/_rels/item1.xml.rels']='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/customXmlProps" Target="itemProps1.xml"/></Relationships>';fileMap['customXml/itemProps1.xml']='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><ds:datastoreItem ds:itemID="{A5A5F09C-2E4C-4E47-8E6A-QAQC00000009}" xmlns:ds="http://schemas.openxmlformats.org/officeDocument/2006/customXml"><ds:schemaRefs/></ds:datastoreItem>';if(fileMap['[Content_Types].xml']&&!fileMap['[Content_Types].xml'].includes('/customXml/itemProps1.xml'))fileMap['[Content_Types].xml']=fileMap['[Content_Types].xml'].replace('</Types>','<Override PartName="/customXml/itemProps1.xml" ContentType="application/vnd.openxmlformats-officedocument.customXmlProperties+xml"/></Types>');}
+function zipReadStore(arrayBuffer){const u=new Uint8Array(arrayBuffer),files={};const td=new TextDecoder();let off=0;const u16r=i=>u[i]|(u[i+1]<<8),u32r=i=>(u[i]|(u[i+1]<<8)|(u[i+2]<<16)|(u[i+3]<<24))>>>0;while(off+30<u.length){const sig=u32r(off);if(sig!==0x04034b50)break;const method=u16r(off+8),size=u32r(off+18),nl=u16r(off+26),el=u16r(off+28);const name=td.decode(u.slice(off+30,off+30+nl));const ds=off+30+nl+el;if(method!==0)throw new Error('รองรับเฉพาะ Excel ที่ Export จากเว็บนี้');files[name]=u.slice(ds,ds+size);off=ds+size;}return files;}
+function dataUrlFromBytes(bytes,path){const ext=(path.split('.').pop()||'png').toLowerCase();const mime=ext==='jpg'||ext==='jpeg'?'image/jpeg':ext==='gif'?'image/gif':ext==='webp'?'image/webp':ext==='bmp'?'image/bmp':'image/png';let bin='';for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode(...bytes.slice(i,i+0x8000));return 'data:'+mime+';base64,'+btoa(bin);}
+function normPayload(payload){const imgList=arr=>(Array.isArray(arr)?arr:[]).map(x=>({base:(x&&x.base)||'',layers:(x&&x.layers)||[]})).filter(x=>x.base);return {meta:payload.meta||{},footer:payload.footer||{},rows:(Array.isArray(payload.rows)?payload.rows:[]).map(r=>({no:r.no||'',name:r.name||'',problem:r.problem||'',pass:!!r.pass,reject:!!r.reject,remarkText:r.remarkText||'',before:imgList(r.before),after:imgList(r.after),remark:imgList(r.remark||r.remarkImages)}))};}
+function colLettersToNum(s){let n=0;for(const ch of s)n=n*26+(ch.charCodeAt(0)-64);return n;}
+function parseCells(sheetXml){const cells={};const cellRe=/<c\s+[^>]*r="([A-Z]+)(\d+)"[^>]*>([\s\S]*?)<\/c>/g;let m;while((m=cellRe.exec(sheetXml))){const col=colLettersToNum(m[1]),row=+m[2],body=m[3];let v='';const tm=body.match(/<t[^>]*>([\s\S]*?)<\/t>/);if(tm)v=xmlUnesc2(tm[1]);else{const vm=body.match(/<v>([\s\S]*?)<\/v>/);if(vm)v=xmlUnesc2(vm[1]);}if(!cells[row])cells[row]={};cells[row][col]=v;}return cells;}
+function dataRowFromExcelRow(r){const pos=(r-12)%18;return (r>=12&&pos>=0&&pos<3)?r:null;}
+function nearestDataRow(r){let best=null,dist=999;for(let p=12;p<=r+5;p++){const dr=dataRowFromExcelRow(p);if(dr!==null){const d=Math.abs(dr-r);if(d<dist){best=dr;dist=d;}}}return best||r;}
+function parseDrawingImages(files){const drawing=new TextDecoder().decode(files['xl/drawings/drawing1.xml']||new Uint8Array());const rels=new TextDecoder().decode(files['xl/drawings/_rels/drawing1.xml.rels']||new Uint8Array());const relMap={};let rm;const relRe=/<Relationship[^>]*Id="([^"]+)"[^>]*Target="([^"]+)"/g;while((rm=relRe.exec(rels)))relMap[rm[1]]=rm[2].replace(/^\.\.\//,'xl/');const out={};const aRe=/<xdr:twoCellAnchor[\s\S]*?<xdr:from>[\s\S]*?<xdr:col>(\d+)<\/xdr:col>[\s\S]*?<xdr:row>(\d+)<\/xdr:row>[\s\S]*?<a:blip[^>]*r:embed="([^"]+)"[\s\S]*?<\/xdr:twoCellAnchor>/g;let a;while((a=aRe.exec(drawing))){const col=(+a[1])+1,row=nearestDataRow((+a[2]));const rid=a[3],path=relMap[rid];if(!path||!files[path])continue;let field=null;if(col>=16&&col<20)field='before';else if(col>=20&&col<24)field='after';else if(col>=26&&col<32)field='remark';if(!field)continue;if(!out[row])out[row]={before:[],after:[],remark:[]};out[row][field].push({base:dataUrlFromBytes(files[path],path),layers:[]});}return out;}
+function parseLegacyQaqcExcel(files){const sheet=new TextDecoder().decode(files['xl/worksheets/sheet1.xml']||new Uint8Array());if(!sheet)throw new Error('ไม่พบ sheet1.xml');const cells=parseCells(sheet),imgs=parseDrawingImages(files),rows=[];Object.keys(cells).map(Number).sort((a,b)=>a-b).forEach(r=>{if(dataRowFromExcelRow(r)===null)return;const c=cells[r]||{};const has=(c[2]||c[3]||c[8]||c[26]||(imgs[r]&&(imgs[r].before.length||imgs[r].after.length||imgs[r].remark.length)));if(!has)return;rows.push({no:c[2]||String(rows.length+1),name:c[3]||'',problem:c[8]||'',pass:(c[24]||'').trim()==='✓',reject:(c[25]||'').trim()==='✓',remarkText:((c[26]||'')==='-'?'':(c[26]||'')),before:(imgs[r]&&imgs[r].before)||[],after:(imgs[r]&&imgs[r].after)||[],remark:(imgs[r]&&imgs[r].remark)||[]});});return {meta:{jobScope:'Boiler service'},footer:{},rows};}
+async function importExcelFile(file){const files=zipReadStore(await file.arrayBuffer());let payload=null;if(files['customXml/item1.xml']){const xml=new TextDecoder().decode(files['customXml/item1.xml']);const m=xml.match(/<payload[^>]*>([\s\S]*?)<\/payload>/);if(m)payload=JSON.parse(excelB64ToUtf8(xmlUnesc2(m[1].trim())));}if(!payload&&files['xl/customData/qaqc_payload.json'])payload=JSON.parse(new TextDecoder().decode(files['xl/customData/qaqc_payload.json']));const data=payload?normPayload(payload):parseLegacyQaqcExcel(files);if(!data.rows.length)throw new Error('ไม่พบข้อมูลใน Excel');restoreData(data);saveNow();setStatus('✅ Import Excel สำเร็จ: '+data.rows.length+' แถว');}
+const excelImportBtn=document.getElementById('excelImportBtn');const excelImportInput=document.getElementById('excelImportInput');
+if(excelImportBtn&&excelImportInput){excelImportBtn.onclick=()=>excelImportInput.click();excelImportInput.onchange=async()=>{const f=excelImportInput.files&&excelImportInput.files[0];if(!f)return;try{if(!/\.xlsx$/i.test(f.name))throw new Error('กรุณาเลือกไฟล์ .xlsx');setStatus('⏳ กำลัง Import Excel…');await importExcelFile(f);}catch(err){console.error(err);alert('Import Excel ไม่สำเร็จ: '+err.message);setStatus('❌ Import Excel ไม่สำเร็จ',false);}finally{excelImportInput.value='';}};}
+
 const excelBtn=document.getElementById('excelBtn');
 excelBtn.onclick=async()=>{
   try{
     setStatus('⏳ กำลัง Export Excel…');
     const payload=collectExcelPayload();
     const fileMap=buildXlsxFileMap(payload);
+    addExcelImportPayloadToXlsx(fileMap, payload);
     const blob=zipStore(fileMap);
 
     const now=new Date();
